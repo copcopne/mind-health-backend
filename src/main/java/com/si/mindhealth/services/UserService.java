@@ -1,13 +1,13 @@
 package com.si.mindhealth.services;
 
 import com.si.mindhealth.dtos.request.LoginRequestDTO;
+import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.security.Principal;
-import java.util.Map;
 
 public interface UserService extends UserDetailsService {
     User getUserByUsername(String username);
@@ -17,6 +17,6 @@ public interface UserService extends UserDetailsService {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     UserResponseDTO updateUser(UserRequestDTO request, Principal principal);
-    UserResponseDTO addUser(Map<String, String> params);
+    UserResponseDTO addUser(RegisterRequestDTO request);
     UserResponseDTO getProfile(Principal principal);
 }

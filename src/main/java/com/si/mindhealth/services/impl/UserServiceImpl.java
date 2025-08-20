@@ -1,6 +1,7 @@
 package com.si.mindhealth.services.impl;
 
 import com.si.mindhealth.dtos.request.LoginRequestDTO;
+import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
@@ -62,22 +63,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDTO addUser(Map<String, String> params) {
+    public UserResponseDTO addUser(RegisterRequestDTO request) {
 
-        if (userRepository.existsByEmail(params.get("email"))) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new MyBadRequestException("Email đã tồn tại!");
         }
-        Optional<User> user = userRepository.findByUsername(params.get("username"));
+        Optional<User> user = userRepository.findByUsername(request.getUsername());
         if (user.isPresent()) {
             throw new MyBadRequestException("Tên người dùng đã tồn tại!");
         }
         User u = new User();
-        u.setFirstName(params.get("first_name"));
-        u.setLastName(params.get("last_name"));
-        u.setEmail(params.get("email"));
-        u.setUsername(params.get("username"));
-        u.setGender(Boolean.valueOf(params.get("gender")));
-        u.setPassword(this.passwordEncoder.encode(params.get("password")));
+        u.setFirstName(request.getFirstName());
+        u.setLastName(request.getLastName());
+        u.setEmail(request.getEmail());
+        u.setUsername(request.getUsername());
+        u.setGender(Boolean.valueOf(request.getGender()));
+        u.setPassword(this.passwordEncoder.encode(request.getPassword()));
         u.setRole("ROLE_USER");
         u.setIsActive(true);
         

@@ -1,5 +1,6 @@
 package com.si.mindhealth.controllers;
 
+import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.services.UserService;
 
@@ -24,10 +25,10 @@ public class APIUserController {
     private final UserService userService;
 
     @PostMapping(path = "/auth/register")
-    public ResponseEntity<?> register(@RequestParam Map<String, String> params) {
+    public ResponseEntity<?> register(@RequestParam RegisterRequestDTO request) {
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(this.userService.addUser(params));
+            .body(this.userService.addUser(request));
     }
 
     @PatchMapping(path = "/users/profile")
