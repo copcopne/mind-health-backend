@@ -5,11 +5,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +28,10 @@ public class User {
 
     @Column(nullable = false)
     private String role;
+
+    @Column(nullable = false)
+    private Boolean gender;
+
+    @Column(nullable = false)
+    private Boolean isActive;
 }

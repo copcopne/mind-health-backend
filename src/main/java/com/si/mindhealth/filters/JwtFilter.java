@@ -1,47 +1,51 @@
 package com.si.mindhealth.filters;
 
 import com.si.mindhealth.utils.JwtUtils;
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
-public class JwtFilter implements Filter {
+@Component
+public class JwtFilter extends OncePerRequestFilter {
+    private static final AntPathMatcher matcher = new AntPathMatcher();
 
-    private static final Set<String> PUBLIC_PREFIXES = Set.of(
-            "/api/auth/login",
-            "/api/auth/refresh",
-            "/api/register"
-    );
+    // Các URL public
+    private static final String[] PUBLIC_PATTERNS = new String[] {
+            "/api/auth/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**"
+    };
 
-    private boolean isWhitelisted(String path) {
-        for (String p : PUBLIC_PREFIXES) {
-            if (path.equals(p) || path.startsWith(p)) return true;
+    private boolean isPublic(HttpServletRequest req) {
+        String path = req.getServletPath();
+        for (String p : PUBLIC_PATTERNS) {
+            if (matcher.match(p, path)) return true;
         }
         return false;
     }
 
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        return isPublic(request);
+    }
 
-        HttpServletRequest http = (HttpServletRequest) req;
-        HttpServletResponse rsp = (HttpServletResponse) res;
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse rsp, @NonNull FilterChain chain)
+            throws ServletException, IOException {
 
-        String path = http.getRequestURI().substring(http.getContextPath().length());
-
-        if (isWhitelisted(path)) {
-            chain.doFilter(req, res);
-            return;
-        }
-
-        String header = http.getHeader("Authorization");
+        String header = req.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
             rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header.");
             return;
@@ -53,9 +57,7 @@ public class JwtFilter implements Filter {
                 rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token không hợp lệ hoặc hết hạn");
                 return;
             }
-            // Chỉ chấp nhận access token
-            String typ = JwtUtils.getType(token);
-            if (!"access".equals(typ)) {
+            if (!"access".equals(JwtUtils.getType(token))) {
                 rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Sai loại token (cần access token).");
                 return;
             }
@@ -68,7 +70,7 @@ public class JwtFilter implements Filter {
                     role != null ? List.of(new SimpleGrantedAuthority(role)) : List.of()
             );
             SecurityContextHolder.getContext().setAuthentication(auth);
-            chain.doFilter(req, res);
+            chain.doFilter(req, rsp);
         } catch (Exception e) {
             rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token không hợp lệ hoặc hết hạn");
         }
