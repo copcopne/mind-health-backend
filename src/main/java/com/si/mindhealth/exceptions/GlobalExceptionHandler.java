@@ -7,9 +7,11 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -17,33 +19,45 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handleNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", ex.getMessage()));
+            .body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidOldPasswordException.class)
     public ResponseEntity<?> handleBadRequest(InvalidOldPasswordException ex) {
         return ResponseEntity.badRequest()
-                .body(Map.of("message", ex.getMessage()));
+            .body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(MyBadRequestException.class)
     public ResponseEntity<?> badRequest(MyBadRequestException ex) {
         return ResponseEntity.badRequest()
-                .body(Map.of("message", ex.getMessage()));
+            .body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<?> handleUnsupprted(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+            .body(Map.of("message", "Không hỗ trợ loại HTTP này!"));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> handleNoResourses(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of("message", "Không tìm thấy tài nguyên yêu cầu!"));
     }
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<?> handleAuth(AuthException ex) {
         return ResponseEntity.internalServerError()
-                .body(Map.of("message", ex.getMessage()));
+            .body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
         var errs = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
+            .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
         return ResponseEntity.badRequest()
-                .body(Map.of("message", "Dữ liệu không hợp lệ", "errors", errs));
+            .body(Map.of("message", "Dữ liệu không hợp lệ!", "errors", errs));
     }
     
     @ExceptionHandler(Exception.class)

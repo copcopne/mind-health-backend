@@ -4,6 +4,7 @@ import com.si.mindhealth.dtos.request.LoginRequestDTO;
 import com.si.mindhealth.dtos.request.RefreshRequestDTO;
 import com.si.mindhealth.services.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class APIAuthController {
     private final AuthService authService;
 
     @PostMapping(path = "/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
 
         return ResponseEntity
             .ok()
@@ -27,7 +28,7 @@ public class APIAuthController {
     }
 
     @PostMapping(path = "/refresh")
-    public ResponseEntity<?> refresh(@RequestBody RefreshRequestDTO request) {
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshRequestDTO request) {
 
         return ResponseEntity
             .ok()

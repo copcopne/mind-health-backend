@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,7 +63,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO addUser(RegisterRequestDTO request) {
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new MyBadRequestException("Email đã tồn tại!");
         }

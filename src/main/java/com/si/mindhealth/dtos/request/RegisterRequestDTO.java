@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -19,14 +20,14 @@ public class RegisterRequestDTO {
     @NotBlank(message = "Email không được để trống!")
     private String email;
 
-    @JsonProperty("first_name")
+    @JsonProperty(value = "first_name")
     @NotBlank(message = "Tên không được để trống!")
     private String firstName;
 
-    @JsonProperty("last_name")
+    @JsonProperty(value = "last_name")
     @NotBlank(message = "Họ không được để trống!")
     private String lastName;
 
-    @NotBlank(message = "Giới tính không được để trống!")
+    @NotNull(message = "Giới tính không được để trống!")
     private Boolean gender;
 }

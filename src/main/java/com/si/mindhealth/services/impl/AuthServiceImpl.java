@@ -21,10 +21,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public CredenticalsResponseDTO loginHandler(LoginRequestDTO request){
-        if (request.getUsername().isBlank() || request.getPassword().isBlank())
-            throw new MyBadRequestException("Tài khoản hoặc mật khẩu không được trống!");
-        
-                    
         String username = request.getUsername();
         if (this.userService.authenticate(request)) {
                 try {
@@ -43,10 +39,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public CredenticalsResponseDTO refreshHandler(RefreshRequestDTO request) {
-
-        if (request.getRefreshToken() == null || request.getRefreshToken().isBlank()) {
-            throw new MyBadRequestException("Refresh token là bắt buộc!");
-        }
         try {
             String username = JwtUtils.getSubject(request.getRefreshToken());
             String role = userService.getRoleByUsername(username);
