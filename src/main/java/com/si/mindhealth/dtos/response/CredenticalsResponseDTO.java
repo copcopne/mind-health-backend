@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class CredenticalsResponseDTO {
 
-    @JsonProperty("access_token")
+    @JsonProperty(value = "access_token")
     private String accessToken;
 
-    @JsonProperty("refresh_token")
+    @JsonProperty(value = "refresh_token")
     private String refreshToken;
     
-    @JsonProperty("expires_in")
+    @JsonProperty(value = "expires_in")
     private int expiresIn;
 
     public CredenticalsResponseDTO(String accesss, String refresh, int expries) {

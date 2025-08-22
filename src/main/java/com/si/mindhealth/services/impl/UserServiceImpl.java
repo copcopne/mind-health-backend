@@ -5,8 +5,6 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
-import com.si.mindhealth.exceptions.AuthException;
-import com.si.mindhealth.exceptions.InvalidOldPasswordException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.UserRepository;
 import com.si.mindhealth.services.UserService;
@@ -110,14 +108,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO updateUser(UserRequestDTO user, Principal principal) {
-
         User u = this.getUserByUsername(principal.getName());
-        if (u == null)
-            throw new AuthException("Phiên đăng nhập không hợp lệ!");
 
         if (user.getPassword() != null)
             if (!this.authenticate(new LoginRequestDTO(u.getUsername(), user.getOldPassword())))
-                throw new InvalidOldPasswordException();
+                throw new MyBadRequestException("Mật khẩu cũ không đúng!");
             else
             u.setPassword(this.passwordEncoder.encode(user.getPassword()));
 

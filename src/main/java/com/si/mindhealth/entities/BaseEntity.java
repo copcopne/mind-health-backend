@@ -20,7 +20,7 @@ public abstract class BaseEntity {
     private Date createdAt;
 
     @PrePersist
-    public void setCA() {
+    private void setCA() {
         this.createdAt = new Date();
     }
 

@@ -8,7 +8,7 @@ import lombok.Value;
 @Value
 public class RefreshRequestDTO {
 
-    @JsonProperty("refresh_token")
+    @JsonProperty(value = "refresh_token")
     @NotBlank(message = "Refresh Token là bắt buộc!")
     private String refreshToken;
 }

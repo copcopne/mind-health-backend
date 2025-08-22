@@ -10,17 +10,17 @@ public class UserResponseDTO {
     
     private Long id;
     
-    @JsonProperty("first_name")
+    @JsonProperty(value = "first_name")
     private String firstName;
     
-    @JsonProperty("last_name")
+    @JsonProperty(value = "last_name")
     private String lastName;
 
     private Boolean gender;
 
     private String role;
     
-    @JsonProperty("is_active")
+    @JsonProperty(value = "is_active")
     private Boolean isActive;
 
     public UserResponseDTO(User user) {

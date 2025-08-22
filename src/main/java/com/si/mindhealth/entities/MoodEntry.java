@@ -19,7 +19,7 @@ public class MoodEntry extends BaseEntity {
     @Column(nullable = false, name = "mood_level")
     private MoodLevel moodLevel;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 255)
     private String content;
 
     @Column(name = "detected_topic")
@@ -36,7 +36,7 @@ public class MoodEntry extends BaseEntity {
     private User user;
 
     @PostPersist
-    public void setRisky() {
+    private void setRisky() {
         this.isRisky = false;
     }
 

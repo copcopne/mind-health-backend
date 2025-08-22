@@ -16,15 +16,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<?> handleNotFound(UserNotFoundException ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<?> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(Map.of("message", ex.getMessage()));
     }
 
-    @ExceptionHandler(InvalidOldPasswordException.class)
-    public ResponseEntity<?> handleBadRequest(InvalidOldPasswordException ex) {
-        return ResponseEntity.badRequest()
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<?> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(403)
             .body(Map.of("message", ex.getMessage()));
     }
 
