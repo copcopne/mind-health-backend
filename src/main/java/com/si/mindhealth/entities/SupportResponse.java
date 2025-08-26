@@ -6,7 +6,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "support_responses")
-@Getter @Setter
+@Getter
+@Setter
 public class SupportResponse extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -16,5 +17,5 @@ public class SupportResponse extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "support_content_id")
     private SupportContent supportContent;
-    
+
 }

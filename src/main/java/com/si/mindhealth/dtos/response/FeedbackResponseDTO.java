@@ -14,7 +14,7 @@ public class FeedbackResponseDTO {
 
     @JsonProperty(value = "target_type")
     private TargetType targetType;
-    
+
     @JsonProperty(value = "target_id")
     private Long targetId;
 

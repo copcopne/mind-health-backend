@@ -8,7 +8,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter
+@Getter
+@Setter
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)
@@ -34,6 +35,9 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, name = "is_active")
     private Boolean isActive;
+    
+    @Column(nullable = false, name = "is_verified")
+    private Boolean isVerified;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MoodEntry> moodEntries;
@@ -43,5 +47,10 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Message> messages;
+
+    @PrePersist
+    private void setVerified() {
+        this.isVerified = false;
+    }
 
 }

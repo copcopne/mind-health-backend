@@ -27,32 +27,30 @@ public class APIMoodEntryController {
     private final MoodEntryService moodEntryService;
 
     @PostMapping(path = "/mood-entries")
-    public ResponseEntity<?> create (@Valid @RequestBody MoodEntryRequestDTO request, Principal principal) {
+    public ResponseEntity<?> create(@Valid @RequestBody MoodEntryRequestDTO request, Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(moodEntryService.create(request, principal));
+                .status(HttpStatus.CREATED)
+                .body(moodEntryService.create(request, principal));
     }
 
     @GetMapping(path = "/mood-entries")
-    public ResponseEntity<?> getList (@RequestParam Map<String, String> params, Principal principal) {
+    public ResponseEntity<?> getList(@RequestParam Map<String, String> params, Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(moodEntryService.getList(params, principal));
+                .status(HttpStatus.OK)
+                .body(moodEntryService.getList(params, principal));
     }
 
     @GetMapping(path = "/mood-entries/{id}")
-    public ResponseEntity<?> get (@PathVariable Long id, Principal principal) {
+    public ResponseEntity<?> get(@PathVariable Long id, Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(moodEntryService.get(id, principal));
+                .status(HttpStatus.OK)
+                .body(moodEntryService.get(id, principal));
     }
 
     @PostMapping(path = "/mood-entries/{id}/feedback")
-    public ResponseEntity<?> feedback (@PathVariable Long id, @Valid FeedbackRequestDTO request, Principal principal) {
+    public ResponseEntity<?> feedback(@PathVariable Long id, @Valid FeedbackRequestDTO request, Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(moodEntryService.feedback(id, request, principal));
+                .status(HttpStatus.OK)
+                .body(moodEntryService.feedback(id, request, principal));
     }
-
-
 }

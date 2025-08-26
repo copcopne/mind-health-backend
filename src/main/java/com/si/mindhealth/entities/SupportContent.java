@@ -11,9 +11,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "support_contents")
-@Getter @Setter
+@Getter
+@Setter
 public class SupportContent extends BaseEntity {
-    
+
     @Enumerated
     @Column(name = "support_type", nullable = false)
     private SupportType supportType;

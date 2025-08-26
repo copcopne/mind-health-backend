@@ -24,25 +24,24 @@ import java.security.Principal;
 public class APIUserController {
     private final UserService userService;
 
-    @PostMapping(path = "/auth/register")
+    @PostMapping(path = "/users")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO request) {
         return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(this.userService.addUser(request));
+                .status(HttpStatus.CREATED)
+                .body(this.userService.addUser(request));
     }
 
-    @PatchMapping(path = "/profile")
+    @PatchMapping(path = "/users")
     public ResponseEntity<?> update(@Valid @RequestBody UserRequestDTO user, Principal principal) {
         return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(userService.updateUser(user, principal));
+                .status(HttpStatus.OK)
+                .body(userService.updateUser(user, principal));
     }
 
-    @GetMapping(path = "/profile")
+    @GetMapping(path = "/users/profile")
     public ResponseEntity<?> getProfile(Principal principal) {
-
         return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(userService.getProfile(principal));
+                .status(HttpStatus.OK)
+                .body(userService.getProfile(principal));
     }
 }

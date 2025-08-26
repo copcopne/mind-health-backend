@@ -12,7 +12,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "mood_entries")
-@Getter @Setter
+@Getter
+@Setter
 public class MoodEntry extends BaseEntity {
 
     @Enumerated

@@ -24,7 +24,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public FeedbackResponseDTO create(TargetType targetType, Long targetId, FeedbackRequestDTO request, Principal principal) {
-        User user = userService.getUserByUsername(principal.getName());
+        User user = userService.getVerifiedUserByUsername(principal.getName());
 
         if (feedbackRepository.existsByUserAndTargetTypeAndTargetId(user, targetType, targetId))
             throw new ForbiddenException("Bạn đã phản hồi đánh giá mục này rồi!");

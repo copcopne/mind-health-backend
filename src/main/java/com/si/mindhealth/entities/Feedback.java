@@ -8,19 +8,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "feedbacks", 
-    uniqueConstraints = @UniqueConstraint(
-        name = "uk_feedback_user_target",
-        columnNames = {"user_id", "target_type", "target_id"}
-    ))
-@Getter @Setter
+@Table(name = "feedbacks", uniqueConstraints = @UniqueConstraint(name = "uk_feedback_user_target", columnNames = {
+        "user_id", "target_type", "target_id" }))
+@Getter
+@Setter
 public class Feedback extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "target_type")
     private TargetType targetType;
-    
+
     @Column(nullable = false, name = "target_id")
     private Long targetId;
 

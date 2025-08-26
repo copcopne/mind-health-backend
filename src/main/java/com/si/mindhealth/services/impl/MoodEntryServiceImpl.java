@@ -37,7 +37,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
     @Override
     public MoodEntryResponseDTO create(MoodEntryRequestDTO request, Principal principal) {
-        User user = userService.getUserByUsername(principal.getName());
+        User user = userService.getVerifiedUserByUsername(principal.getName());
         MoodEntry entry = new MoodEntry();
 
         entry.setUser(user);
@@ -54,7 +54,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
     @Override
     public MoodEntryResponseDTO get(Long id, Principal principal) {
-        User user = userService.getUserByUsername(principal.getName());
+        User user = userService.getVerifiedUserByUsername(principal.getName());
 
         Optional<MoodEntry> optional = moodEntryRepository.findByIdAndUser(id, user);
 
@@ -67,31 +67,31 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
     @Override
     public PageResponseDTO<MoodEntryResponseDTO> getList(Map<String, String> params, Principal principal) {
-        User user = userService.getUserByUsername(principal.getName());
+        User user = userService.getVerifiedUserByUsername(principal.getName());
 
         int page = NumberUtils.toInt(params.get("page"), 0);
         int size = NumberUtils.toInt(params.get("size"), 10);
-            
+
         size = Math.min(Math.max(size, 1), 100);
 
         String sortBy = params.getOrDefault("sort", "createdAt");
-        String order  = params.getOrDefault("order", "DESC");
+        String order = params.getOrDefault("order", "DESC");
         Sort.Direction dir = "ASC".equalsIgnoreCase(order) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sortBy));
 
         Page<MoodEntry> pageData = moodEntryRepository.findByUser(user, pageable);
         PageResponseDTO<MoodEntryResponseDTO> response = new PageResponseDTO<>(
-            pageData.map(MoodEntryResponseDTO::new)
-        );
+                pageData.map(MoodEntryResponseDTO::new));
 
         return response;
-}
+    }
 
     @Override
     public FeedbackResponseDTO feedback(Long id, FeedbackRequestDTO request, Principal principal) {
-        if (moodEntryRepository.existsByIdAndUser_Username(id, principal.getName()))
+        User user = userService.getVerifiedUserByUsername(principal.getName());
+        if (moodEntryRepository.existsByIdAndUser(id, user))
             throw new ForbiddenException("Bạn không có quyền đánh giá phản hồi này!");
-            
+
         return this.feedbackService.create(TargetType.SUPPORT_RESPONSE, id, request, principal);
     }
 }

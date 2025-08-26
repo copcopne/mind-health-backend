@@ -8,7 +8,7 @@ import lombok.Value;
 
 @Value
 public class FeedbackRequestDTO {
-    
+
     @JsonProperty(value = "satisfy_level")
     @NotNull(message = "Mức độ hài lòng là bắt buộc!")
     private SatisfyLevel satisfyLevel;

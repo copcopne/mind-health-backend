@@ -8,7 +8,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "messages")
-@Getter @Setter
+@Getter
+@Setter
 public class Message extends BaseEntity {
 
     @Enumerated(EnumType.STRING)

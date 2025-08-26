@@ -9,7 +9,7 @@ public class LoginRequestDTO {
 
     @NotBlank(message = "Tên người dùng là bắt buộc!")
     private String username;
-    
+
     @NotNull(message = "Mật khẩu là bắt buộc!")
     private String password;
 }

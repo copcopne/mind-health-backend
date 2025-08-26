@@ -9,10 +9,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "processing_logs")
-@Getter @Setter
+@Getter
+@Setter
 public class ProcessingLog extends BaseEntity {
-    
-    @Column(name="target_type", nullable = false)
+
+    @Column(name = "target_type", nullable = false)
     private TargetType targetType;
 
     @Column(name = "target_id", nullable = false)

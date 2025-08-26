@@ -18,7 +18,7 @@ public class PageResponseDTO<T> {
     private int totalPages;
     private boolean hasNext;
     private boolean hasPrevious;
-    private String sort;      
+    private String sort;
 
     public PageResponseDTO(Page<T> pageData) {
         this.content = pageData.getContent();

@@ -5,6 +5,7 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
+import com.si.mindhealth.exceptions.ForbiddenException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.UserRepository;
 import com.si.mindhealth.services.UserService;
@@ -23,7 +24,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-
 @Service("userDetailsService")
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -33,12 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> u = userRepository.findByUsername(username);
-        if (u.isEmpty())
-            throw new UsernameNotFoundException(
-                    String.format("Không tìm thấy người dùng với username: %s", username)
-            );
-        User user = u.get();
+        User user = this.getUserByUsername(username);
         Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(user.getRole()));
 
@@ -49,13 +44,31 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByUsername(String username) {
         Optional<User> u = userRepository.findByUsername(username);
+        if (u.isEmpty())
+            throw new MyBadRequestException("Không tồn tại người dùng với username: " + username);
+
         return u.get();
+    }
+
+    @Override
+    public User getVerifiedUserByUsername(String username) {
+        User user = this.getUserByUsername(username);
+
+        if (user.getIsVerified() == false)
+            throw new ForbiddenException("Tài khoản chưa được xác minh nên không có quyền!");
+
+        if (user.getIsActive() == false)
+            throw new ForbiddenException("Tài khoản đã bị khóa!");
+
+        return user;
     }
 
     @Override
     public User getUserByEmail(String email) {
         Optional<User> u = userRepository.findByEmail(email);
-        return u.get();
+        if (u.isPresent())
+            return u.get();
+        return null;
     }
 
     @Override
@@ -77,7 +90,7 @@ public class UserServiceImpl implements UserService {
         u.setPassword(this.passwordEncoder.encode(request.getPassword()));
         u.setRole("ROLE_USER");
         u.setIsActive(true);
-        
+
         return new UserResponseDTO(this.userRepository.save(u));
     }
 
@@ -108,20 +121,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDTO updateUser(UserRequestDTO user, Principal principal) {
-        User u = this.getUserByUsername(principal.getName());
+        User u = this.getVerifiedUserByUsername(principal.getName());
 
         if (user.getPassword() != null)
             if (!this.authenticate(new LoginRequestDTO(u.getUsername(), user.getOldPassword())))
                 throw new MyBadRequestException("Mật khẩu cũ không đúng!");
             else
-            u.setPassword(this.passwordEncoder.encode(user.getPassword()));
+                u.setPassword(this.passwordEncoder.encode(user.getPassword()));
 
         if (user.getGender() != null)
             u.setGender(user.getGender());
 
         if (user.getFirstName() != null)
             u.setFirstName(user.getFirstName());
-            
+
         if (user.getLastName() != null)
             u.setLastName(user.getLastName());
 
@@ -135,5 +148,28 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO getProfile(Principal principal) {
         User user = this.getUserByUsername(principal.getName());
         return new UserResponseDTO(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO verifyUserByEmail(String email) {
+        var u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user."));
+
+        u.setIsVerified(true);
+        User newUser = userRepository.save(u);
+        UserResponseDTO response = new UserResponseDTO(newUser);
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public void resetPasswordByEmail(String email, String rawNewPassword) {
+        var u = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user."));
+
+        u.setPassword(passwordEncoder.encode(rawNewPassword));
+        userRepository.save(u);
     }
 }

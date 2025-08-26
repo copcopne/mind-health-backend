@@ -12,7 +12,7 @@ public class CredenticalsResponseDTO {
 
     @JsonProperty(value = "refresh_token")
     private String refreshToken;
-    
+
     @JsonProperty(value = "expires_in")
     private int expiresIn;
 

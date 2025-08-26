@@ -30,8 +30,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private boolean isPublic(HttpServletRequest req) {
         String path = req.getServletPath();
+        String method = req.getMethod();
+
+        // Chỉ cho phép POST /api/users là public
+        if ("POST".equalsIgnoreCase(method) && matcher.match("/api/users", path)) {
+            return true;
+        }
+        // Các pattern khác
         for (String p : PUBLIC_PATTERNS) {
-            if (matcher.match(p, path)) return true;
+            if (matcher.match(p, path))
+                return true;
         }
         return false;
     }
@@ -42,7 +50,8 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse rsp, @NonNull FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse rsp,
+            @NonNull FilterChain chain)
             throws ServletException, IOException {
 
         String header = req.getHeader("Authorization");
@@ -67,8 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             var auth = new UsernamePasswordAuthenticationToken(
                     username, null,
-                    role != null ? List.of(new SimpleGrantedAuthority(role)) : List.of()
-            );
+                    role != null ? List.of(new SimpleGrantedAuthority(role)) : List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, rsp);
         } catch (Exception e) {

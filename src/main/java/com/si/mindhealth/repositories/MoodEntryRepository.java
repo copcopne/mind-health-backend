@@ -12,5 +12,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MoodEntryRepository extends JpaRepository<MoodEntry, Long> {
     Optional<MoodEntry> findByIdAndUser(Long id, User user);
     Page<MoodEntry> findByUser(User user, Pageable pageable);
-    Boolean existsByIdAndUser_Username(Long id, String username);
+    Boolean existsByIdAndUser(Long id, User user);
 }
