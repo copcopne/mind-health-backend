@@ -1,0 +1,68 @@
+{
+  "STUDY": [
+    "hoc",
+    "thi",
+    "deadline",
+    "bai tap",
+    "assignment",
+    "diem",
+    "do an",
+    "bao cao",
+    "thuc tap"
+  ],
+  "WORK": [
+    "cong viec",
+    "du an",
+    "task",
+    "sếp",
+    "hop",
+    "ot",
+    "deadline",
+    "kpi",
+    "thu viec"
+  ],
+  "LOVE": [
+    "tinh yeu",
+    "nguoi yeu",
+    "crush",
+    "hen ho",
+    "chia tay",
+    "gian hon",
+    "romance"
+  ],
+  "FAMILY": ["gia dinh", "ba me", "cha me", "anh chi em", "con cai", "to am"],
+  "SOCIAL": ["ban be", "mxh", "mang xa hoi", "ket noi", "gap go", "tuong tac"],
+  "MONEY": [
+    "tien",
+    "tai chinh",
+    "chi tieu",
+    "tiet kiem",
+    "no nan",
+    "luong",
+    "thu nhap"
+  ],
+  "HEALTH": [
+    "suc khoe",
+    "an uong",
+    "tap luyen",
+    "benh",
+    "thuoc",
+    "ngu nghi",
+    "dinh duong"
+  ],
+  "MENTAL_HEALTH": [
+    "stress",
+    "lo au",
+    "tram cam",
+    "hoang so",
+    "khung hoang",
+    "tri lieu"
+  ],
+  "TRAUMA": ["ton thuong", "bi lam dung", "ky uc xau", "sang chan", "bao hanh"],
+  "LONELINESS": ["co don", "trong trai", "khong ai", "chan khong"],
+  "MOTIVATION": ["dong luc", "muc tieu", "phat trien", "thanh tuu", "co gang"],
+  "DECISION": ["quyet dinh", "phan van", "chon lua", "lua chon", "doi huong"],
+  "FUTURE": ["tuong lai", "ke hoach", "dinh huong", "muc tieu dai han"],
+  "MYSELF": ["ban than", "tu tin", "tu trong", "self care", "yeu ban than"],
+  "LIFE": ["cuoc song", "y nghia", "thoi quen", "thang bang"]
+}

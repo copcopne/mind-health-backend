@@ -15,11 +15,11 @@ import lombok.Setter;
 @Setter
 public class SupportContent extends BaseEntity {
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "support_type", nullable = false)
     private SupportType supportType;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "support_topic", nullable = false)
     private SupportTopic supportTopic;
 
