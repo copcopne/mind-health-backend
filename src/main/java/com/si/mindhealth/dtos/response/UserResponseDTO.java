@@ -10,6 +10,8 @@ public class UserResponseDTO {
 
     private Long id;
 
+    private String email;
+
     @JsonProperty(value = "first_name")
     private String firstName;
 
@@ -23,6 +25,9 @@ public class UserResponseDTO {
     @JsonProperty(value = "is_active")
     private Boolean isActive;
 
+    @JsonProperty(value = "is_verified")
+    private Boolean isVerified;
+
     public UserResponseDTO(User user) {
         this.setFirstName(user.getFirstName());
         this.setLastName(user.getLastName());
@@ -30,5 +35,7 @@ public class UserResponseDTO {
         this.setId(user.getId());
         this.setRole(user.getRole());
         this.setIsActive(user.getIsActive());
+        this.setIsVerified(user.getIsVerified());
+        this.setEmail(user.getEmail());
     }
 }

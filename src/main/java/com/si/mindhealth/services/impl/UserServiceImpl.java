@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public User getUserByUsername(String username) {
         Optional<User> u = userRepository.findByUsername(username);
         if (u.isEmpty())
-            throw new MyBadRequestException("Không tồn tại người dùng với username: " + username);
+            throw new MyBadRequestException("Không tồn tại người dùng với username: " + username + "!");
 
         return u.get();
     }
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         User user = this.getUserByUsername(username);
 
         if (user.getIsVerified() == false)
-            throw new ForbiddenException("Tài khoản chưa được xác minh nên không có quyền!");
+            throw new ForbiddenException("Tài khoản chưa được xác minh!");
 
         if (user.getIsActive() == false)
             throw new ForbiddenException("Tài khoản đã bị khóa!");
@@ -152,10 +152,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDTO verifyUserByEmail(String email) {
-        var u = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user."));
-
+    public UserResponseDTO verifyUser(User u) {
+        
         u.setIsVerified(true);
         User newUser = userRepository.save(u);
         UserResponseDTO response = new UserResponseDTO(newUser);
@@ -165,9 +163,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void resetPasswordByEmail(String email, String rawNewPassword) {
-        var u = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user."));
+    public void resetPassword(User u, String rawNewPassword) {
 
         u.setPassword(passwordEncoder.encode(rawNewPassword));
         userRepository.save(u);

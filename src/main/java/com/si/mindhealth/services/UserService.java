@@ -31,7 +31,7 @@ public interface UserService extends UserDetailsService {
 
     UserResponseDTO getProfile(Principal principal);
 
-    UserResponseDTO verifyUserByEmail(String email);
+    UserResponseDTO verifyUser(User user);
 
-    void resetPasswordByEmail(String email, String rawNewPassword);
+    void resetPassword(User user, String rawNewPassword);
 }

@@ -114,7 +114,9 @@ public class OTPServiceImpl implements OTPService {
         repo.save(otp);
 
         if (type == OTPType.RESET_PASSWORD)
-            userService.resetPasswordByEmail(user.getEmail(), request.getNewPassword());
+            userService.resetPassword(user, request.getNewPassword());
+        else
+            userService.verifyUser(user);
     }
 
     @Override

@@ -39,7 +39,14 @@ public class APIAuthController {
                 .body(authService.refreshHandler(request));
     }
 
-    @PostMapping(path = "/email-verify/verify")
+    @PostMapping(path = "/email-verify/request")
+    public ResponseEntity<?> emailVerify(@Valid @RequestBody OTPRequestDTO request) {
+        otpService.sendOTP(request.getEmail(), OTPType.VERIFY);
+        return ResponseEntity
+                .ok().build();
+    }
+
+    @PostMapping(path = "/email-verify")
     public ResponseEntity<?> verify(@Valid @RequestBody VerifyUserByOTPRequestDTO request) {
         otpService.verify(request, OTPType.VERIFY);
         return ResponseEntity
