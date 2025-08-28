@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.si.mindhealth.dtos.TopicMultiResult;
 import com.si.mindhealth.dtos.request.FeedbackRequestDTO;
 import com.si.mindhealth.dtos.request.MoodEntryRequestDTO;
 import com.si.mindhealth.dtos.response.FeedbackResponseDTO;
@@ -24,6 +25,7 @@ import com.si.mindhealth.exceptions.NotFoundException;
 import com.si.mindhealth.repositories.MoodEntryRepository;
 import com.si.mindhealth.services.FeedbackService;
 import com.si.mindhealth.services.MoodEntryService;
+import com.si.mindhealth.services.TopicDetector;
 import com.si.mindhealth.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
     private final MoodEntryRepository moodEntryRepository;
     private final UserService userService;
     private final FeedbackService feedbackService;
+    private final TopicDetector detector;
 
     @Override
     public MoodEntryResponseDTO create(MoodEntryRequestDTO request, Principal principal) {
@@ -46,7 +49,8 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
         entry.setId(moodEntryRepository.save(entry).getId());
 
-        ////////// goi ham xu ly content
+        TopicMultiResult results = detector.detectMulti(request);
+        
 
         MoodEntryResponseDTO response = new MoodEntryResponseDTO(entry);
         return response;

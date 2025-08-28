@@ -2,24 +2,42 @@
   "STUDY": [
     "hoc",
     "thi",
+    "thi cu",
     "deadline",
+    "bai",
     "bai tap",
     "assignment",
     "diem",
     "do an",
     "bao cao",
-    "thuc tap"
+    "thuc tap",
+    "on thi",
+    "ki thi",
+    "lam bai",
+    "lam duoc",
+    "lam duoc bai",
+    "giai bai",
+    "on thi",
+    "de thi",
+    "de bai",
+    "sua bai",
+    "bai tap lon",
+    "khoa luan"
   ],
   "WORK": [
     "cong viec",
     "du an",
     "task",
-    "sếp",
+    "sep",
     "hop",
     "ot",
+    "overtime",
+    "tang ca",
     "deadline",
     "kpi",
-    "thu viec"
+    "thu viec",
+    "luong",
+    "dong nghiep"
   ],
   "LOVE": [
     "tinh yeu",
@@ -28,10 +46,43 @@
     "hen ho",
     "chia tay",
     "gian hon",
-    "romance"
+    "nguoi yeu cu"
   ],
-  "FAMILY": ["gia dinh", "ba me", "cha me", "anh chi em", "con cai", "to am"],
-  "SOCIAL": ["ban be", "mxh", "mang xa hoi", "ket noi", "gap go", "tuong tac"],
+  "FAMILY": [
+    "gia dinh",
+    "ba me",
+    "cha me",
+    "anh chi em",
+    "con cai",
+    "bo me",
+    "cha",
+    "me",
+    "ong ba",
+    "nguoi than",
+    "xung dot",
+    "cai va",
+    "cai nhau",
+    "bat hoa",
+    "vo chong",
+    "ly hon",
+    "li di",
+    "don li hon",
+    "toa an",
+    "chia tay vo chong",
+    "bo ruong",
+    "con chon theo ai"
+  ],
+  "SOCIAL": [
+    "ban be",
+    "mang xa hoi",
+    "ket noi",
+    "gap go",
+    "tuong tac",
+    "giao tiep",
+    "facebook",
+    "instagram",
+    "tiktok"
+  ],
   "MONEY": [
     "tien",
     "tai chinh",
@@ -39,7 +90,18 @@
     "tiet kiem",
     "no nan",
     "luong",
-    "thu nhap"
+    "thu nhap",
+    "vay no",
+    "tra no",
+    "lai suat",
+    "muon tien",
+    "muon no",
+    "khieu nai tien bac",
+    "no dong",
+    "ngan hang",
+    "kho khan tai chinh",
+    "thieu tien",
+    "mat tien"
   ],
   "HEALTH": [
     "suc khoe",
@@ -48,21 +110,91 @@
     "benh",
     "thuoc",
     "ngu nghi",
-    "dinh duong"
+    "dinh duong",
+    "gym",
+    "chay bo",
+    "y te",
+    "cardio"
   ],
   "MENTAL_HEALTH": [
     "stress",
     "lo au",
     "tram cam",
+    "ap luc",
+    "kiet suc",
+    "tuyet vong",
+    "buong bo",
     "hoang so",
+    "met moi",
+    "khong chiu noi",
     "khung hoang",
-    "tri lieu"
+    "tri lieu",
+    "that vong",
+    "chan nan"
   ],
-  "TRAUMA": ["ton thuong", "bi lam dung", "ky uc xau", "sang chan", "bao hanh"],
-  "LONELINESS": ["co don", "trong trai", "khong ai", "chan khong"],
-  "MOTIVATION": ["dong luc", "muc tieu", "phat trien", "thanh tuu", "co gang"],
-  "DECISION": ["quyet dinh", "phan van", "chon lua", "lua chon", "doi huong"],
-  "FUTURE": ["tuong lai", "ke hoach", "dinh huong", "muc tieu dai han"],
-  "MYSELF": ["ban than", "tu tin", "tu trong", "self care", "yeu ban than"],
-  "LIFE": ["cuoc song", "y nghia", "thoi quen", "thang bang"]
+  "TRAUMA": [
+    "ton thuong",
+    "bi lam dung",
+    "bao hanh",
+    "bao luc gia dinh",
+    "xuc pham",
+    "loi le qua dang",
+    "si va",
+    "mang nhuc",
+    "danh dap",
+    "ky uc xau",
+    "xung dot vo chong",
+    "bi chui",
+    "bi danh"
+  ],
+  "LONELINESS": [
+    "co don",
+    "trong trai",
+    "khong ai",
+    "cam thay mot minh",
+    "don doc"
+  ],
+  "MOTIVATION": [
+    "dong luc",
+    "muc tieu",
+    "phat trien",
+    "thanh tuu",
+    "co gang",
+    "no luc",
+    "tu hoc"
+  ],
+  "DECISION": [
+    "quyet dinh",
+    "phan van",
+    "chon lua",
+    "lua chon",
+    "doi huong",
+    "chuyen huong",
+    "phai chon",
+    "con chon theo ai",
+    "su lua chon kho khan"
+  ],
+  "FUTURE": [
+    "tuong lai",
+    "ke hoach",
+    "dinh huong",
+    "muc tieu",
+    "uoc mo",
+    "tham vong"
+  ],
+  "MYSELF": [
+    "tu tin",
+    "tu trong",
+    "self care",
+    "yeu ban than",
+    "cham soc ban than"
+  ],
+  "LIFE": [
+    "cuoc song",
+    "y nghia",
+    "thoi quen",
+    "thang bang",
+    "ngay thuong",
+    "cuoc doi"
+  ]
 }

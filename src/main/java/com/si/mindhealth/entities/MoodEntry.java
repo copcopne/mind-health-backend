@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 public class MoodEntry extends BaseEntity {
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "mood_level")
     private MoodLevel moodLevel;
 
@@ -26,8 +26,8 @@ public class MoodEntry extends BaseEntity {
     @Column(name = "detected_topic")
     private SupportTopic detectedTopic;
 
-    @Column(name = "is_risky", nullable = false)
-    private Boolean isRisky;
+    @Column(name = "is_crisis", nullable = false)
+    private Boolean isCrisis;
 
     @OneToMany(mappedBy = "moodEntry", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SupportResponse> supportResponses;
@@ -37,8 +37,8 @@ public class MoodEntry extends BaseEntity {
     private User user;
 
     @PostPersist
-    private void setRisky() {
-        this.isRisky = false;
+    private void setCrisis() {
+        this.isCrisis = false;
     }
 
 }

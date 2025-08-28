@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "notes": "Regex Vietnamese slang normalization (không dấu, lowercase trước khi áp dụng).",
+  "rules": [
+    { "from": "\\ba\\b", "to": "anh" },
+    { "from": "\\be\\b", "to": "em" },
+    { "from": "\\bt\\b", "to": "toi" },
+    { "from": "\\bmk\\b", "to": "minh" },
+    { "from": "\\bmik\\b", "to": "minh" },
+    { "from": "\\bvk\\b", "to": "vo" },
+    { "from": "\\bck\\b", "to": "chong" },
+    { "from": "\\bmn\\b", "to": "moi nguoi" },
+    { "from": "\\bmng\\b", "to": "moi nguoi" },
+
+    { "from": "\\bko\\b", "to": "khong" },
+    { "from": "\\bkh\\b", "to": "khong" },
+    { "from": "\\bk\\b", "to": "khong" },
+    { "from": "\\bhk\\b", "to": "khong" },
+    { "from": "\\bhok\\b", "to": "khong" },
+    { "from": "\\bhong\\b", "to": "khong" },
+    { "from": "\\bhum\\b", "to": "hom" },
+    { "from": "\\bhqa?\\b", "to": "hom qua" },
+    { "from": "\\bhnay?\\b", "to": "hom nay" },
+
+    { "from": "\\bbt\\b", "to": "bai tap"},
+    { "from": "\\bbtl\\b", "to": "bai tap lon"},
+    
+    { "from": "\\bbik\\b", "to": "biet" },
+    { "from": "\\bj\\b", "to": "gi" },
+
+    { "from": "\\bvs\\b", "to": "voi" },
+    { "from": "\\bwa\\b", "to": "qua" },
+    { "from": "\\bqa\\b", "to": "qua" },
+    { "from": "\\bqh\\b", "to": "quan he" },
+
+    { "from": "\\bntn\\b", "to": "nhu the nao" },
+    { "from": "\\bnthe\\b", "to": "nhu the" },
+    { "from": "\\bms\\b", "to": "moi" },
+    { "from": "\\bnvx\\b", "to": "nhan vien" },
+
+    { "from": "\\btrc\\b", "to": "truoc" },
+    { "from": "\\bsau\\b", "to": "sau" },
+    { "from": "\\btr\\b", "to": "tren" },
+    { "from": "\\bdư?oi\\b", "to": "duoi" },
+
+    { "from": "\\bdc\\b", "to": "duoc" },
+    { "from": "\\bd\\b", "to": "khong duoc" },
+    { "from": "\\bnma?\\b", "to": "nhung ma" },
+
+    { "from": "\\bj\\b", "to": "gi" },
+    { "from": "\\bcj\\b", "to": "cai gi" },
+    { "from": "\\bgi?\\b", "to": "gi" },
+
+    { "from": "\\bbth\\b", "to": "binh thuong" },
+    { "from": "\\bbthg\\b", "to": "binh thuong" },
+    { "from": "\\bbthuong\\b", "to": "binh thuong" },
+
+    { "from": "\\bik\\b", "to": "di" },
+
+    { "from": "\\bcr\\b", "to": "crush" },
+    { "from": "\\bbf\\b", "to": "ban than" },
+    { "from": "\\bny\\b", "to": "nguoi yeu" },
+
+    { "from": "\\bvl\\b", "to": "rat" },
+    { "from": "\\bvcl\\b", "to": "rat" },
+    { "from": "\\bhuhu+\\b", "to": "buon" },
+    { "from": "\\bhaiz+\\b", "to": "than tho" },
+
+    { "from": "\\bmsv\\b", "to": "ma so sinh vien" },
+    { "from": "\\bgv\\b", "to": "giang vien" },
+    { "from": "\\bsv\\b", "to": "sinh vien" },
+
+    { "from": "\\bok\\b", "to": "duoc" },
+    { "from": "\\bokela(y)?\\b", "to": "duoc" },
+
+    { "from": "\\bzz+\\b", "to": "ngu" },
+    { "from": "\\bzzz+\\b", "to": "ngu" },
+
+    { "from": "\\bcv\\b", "to": "cong viec" },
+    { "from": "\\bcviec\\b", "to": "cong viec" },
+    { "from": "\\btgian\\b", "to": "thoi gian" }
+  ]
+}

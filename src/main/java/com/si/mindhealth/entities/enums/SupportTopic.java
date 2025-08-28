@@ -2,6 +2,8 @@ package com.si.mindhealth.entities.enums;
 
 public enum SupportTopic {
 
+    GENERAL("Chung"),
+
     LIFE("Cuộc sống"),
     SOCIAL("Giao tiếp xã hội"),
     MYSELF("Bản thân"),

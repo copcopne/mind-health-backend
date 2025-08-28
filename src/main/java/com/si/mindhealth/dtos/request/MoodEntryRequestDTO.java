@@ -10,9 +10,9 @@ import lombok.Value;
 public class MoodEntryRequestDTO {
 
     @JsonProperty(value = "mood_level")
-    @NotBlank(message = "Bạn chưa phân loại tâm trạng!")
     private MoodLevel moodLevel;
 
     @NotBlank(message = "Bạn chưa nhập tâm sự của mình!")
     private String content;
+
 }
