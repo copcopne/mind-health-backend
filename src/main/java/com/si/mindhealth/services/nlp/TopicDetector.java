@@ -42,12 +42,11 @@ public class TopicDetector {
             "khi", "cua", "cho", "lam", "vi");
 
     @Transactional
-    public TopicMultiResult detectMulti(MoodEntry moodEntry) {
+    public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog) {
         String rawNote = moodEntry.getContent();
         MoodLevel userMood = moodEntry.getMoodLevel();
         // 1) Chuẩn hoá
         String text = NormalizeInput.normalizeForMatch(rawNote);
-        log.info("Normalized input: {}", text);
 
         // 2) KHÔNG lọc stopwords -> cho phrase
         List<String> tokensAll = Arrays.stream(text.split("\\s+"))
@@ -94,14 +93,12 @@ public class TopicDetector {
                     boolean hit = bigramsAll.contains(k);
                     if (hit) {
                         score += BIGRAM_BONUS;
-                        log.debug("[{}] HIT EXACT PHRASE: '{}' (+{})", topic, k, BIGRAM_BONUS);
                     } else {
                         // fuzzy phrase trên cửa sổ 2- từ của tokensAll
                         for (int i = 0; i < tokensAll.size() - 1; i++) {
                             String win = tokensAll.get(i) + " " + tokensAll.get(i + 1);
                             if (Fuzzy.close(win, k)) {
                                 score += BIGRAM_BONUS;
-                                log.debug("[{}] HIT FUZZY PHRASE: '{}' ~ '{}' (+{})", topic, win, k, BIGRAM_BONUS);
                                 break;
                             }
                         }
@@ -110,12 +107,10 @@ public class TopicDetector {
                     // unigram check bằng tokens + filteredPadded
                     if (tokenSet.contains(k) || filteredPadded.contains(" " + k + " ")) {
                         score += UNIGRAM_SCORE;
-                        log.debug("[{}] HIT EXACT WORD: '{}' (+{})", topic, k, UNIGRAM_SCORE);
                     } else if (k.length() >= 4) {
                         for (String t : tokens) {
                             if (t.length() >= 4 && Fuzzy.close(t, k)) {
                                 score += UNIGRAM_SCORE;
-                                log.debug("[{}] HIT FUZZY WORD: '{}' ~ '{}' (+{})", topic, t, k, UNIGRAM_SCORE);
                                 break;
                             }
                         }
@@ -146,7 +141,6 @@ public class TopicDetector {
                 score += 1;
             }
 
-            log.debug("Topic={} score={}", topic, score);
             scores.put(topic, score);
         }
 
@@ -182,50 +176,47 @@ public class TopicDetector {
         MoodLevel model = MoodMapper.fromSentiment(r);
         MoodDecider.Decision md = MoodDecider.decide(userMood, r, crisis);
 
-        log.debug("BEST topic={} bestScore={}", primaryTopic, primaryScore);
-        log.debug("neg={} pos={} compound={} negRatio={}", r.neg(), r.pos(), r.compound(), r.negRatio());
-        log.debug("mood: user={}, model={}, final={}, crisis={}, disagreed={}, overriddenByCrisis={}",
-                userMood, model, md.finalMood, crisis, md.disagreed, md.overriddenByCrisis);
-
         // 12) build payload log
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("moodEntryId", moodEntry.getId());
-        payload.put("rawNote", rawNote);
-        payload.put("normalizedText", text);
-        payload.put("userMood", userMood != null ? userMood.name() : null);
-        payload.put("scores", scores.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue)));
-        payload.put("passed", passed.stream()
-                .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
-                .toList());
-        payload.put("hits", hits.stream()
-                .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
-                .toList());
-        payload.put("primaryTopic", primaryTopic.name());
-        payload.put("primaryScore", primaryScore);
-        payload.put("negRatio", negRatio);
-        payload.put("crisis", crisis);
-        payload.put("modelMood", model.name());
-        payload.put("finalMood", md.finalMood.name());
-        payload.put("disagreed", md.disagreed);
-        payload.put("overriddenByCrisis", md.overriddenByCrisis);
+        if (saveLog == true) {
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("moodEntryId", moodEntry.getId());
+            payload.put("rawNote", rawNote);
+            payload.put("normalizedText", text);
+            payload.put("userMood", userMood != null ? userMood.name() : null);
+            payload.put("scores", scores.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue)));
+            payload.put("passed", passed.stream()
+                    .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                    .toList());
+            payload.put("hits", hits.stream()
+                    .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                    .toList());
+            payload.put("primaryTopic", primaryTopic.name());
+            payload.put("primaryScore", primaryScore);
+            payload.put("negRatio", negRatio);
+            payload.put("crisis", crisis);
+            payload.put("modelMood", model.name());
+            payload.put("finalMood", md.finalMood.name());
+            payload.put("disagreed", md.disagreed);
+            payload.put("overriddenByCrisis", md.overriddenByCrisis);
 
-        String jsonPayload;
-        try {
-            jsonPayload = objectMapper.writeValueAsString(payload);
-            log.info("NLP Processing Log: {}", jsonPayload);
-        } catch (Exception e) {
-            log.error("Failed to serialize processing log", e);
-            jsonPayload = "{}"; // fallback
+            String jsonPayload;
+            try {
+                jsonPayload = objectMapper.writeValueAsString(payload);
+                log.info("NLP Processing Log: {}", jsonPayload);
+            } catch (Exception e) {
+                log.error("Failed to serialize processing log", e);
+                jsonPayload = "{}"; // fallback
+            }
+
+            // 13) Lưu log
+            ProcessingLog logEntity = new ProcessingLog();
+            logEntity.setTargetType(TargetType.MOOD_ENTRY);
+            logEntity.setTargetId(moodEntry.getId());
+            logEntity.setPayload(jsonPayload);
+
+            processingLogRepository.save(logEntity);
         }
-        
-        // 13) Lưu log
-        ProcessingLog logEntity = new ProcessingLog();
-        logEntity.setTargetType(TargetType.MOOD_ENTRY);
-        logEntity.setTargetId(moodEntry.getId());
-        logEntity.setPayload(jsonPayload);
-
-        processingLogRepository.save(logEntity);
 
         // 14) Build DTO
         return new TopicMultiResult(

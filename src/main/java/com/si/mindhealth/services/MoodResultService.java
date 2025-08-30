@@ -2,8 +2,9 @@ package com.si.mindhealth.services;
 
 import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
+import com.si.mindhealth.entities.User;
 
 public interface MoodResultService {
     MoodResult getResult(MoodEntry entry);
-    void CalculateResult(MoodEntry entry);
+    void CalculateResult(MoodEntry entry, User user);
 }

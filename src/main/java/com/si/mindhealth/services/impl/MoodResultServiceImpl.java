@@ -10,6 +10,7 @@ import com.si.mindhealth.dtos.TopicMultiResult;
 import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.MoodResultTopic;
+import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.TopicType;
 import com.si.mindhealth.repositories.MoodResultRepository;
 import com.si.mindhealth.services.MoodResultService;
@@ -27,8 +28,8 @@ public class MoodResultServiceImpl implements MoodResultService {
     @Override
     @Async
     @Transactional
-    public void CalculateResult(MoodEntry entry) {
-        TopicMultiResult resuls = topicDetector.detectMulti(entry);
+    public void CalculateResult(MoodEntry entry, User user) {
+        TopicMultiResult resuls = topicDetector.detectMulti(entry, user.getIsAcceptSharingData());
 
         MoodResult r = new MoodResult();
         r.setMoodEntry(entry);

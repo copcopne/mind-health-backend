@@ -91,6 +91,10 @@ public class UserServiceImpl implements UserService {
         u.setRole("ROLE_USER");
         u.setIsActive(true);
 
+        if(request.getAcceptSharingData() == null)
+            u.setIsAcceptSharingData(true);
+        else u.setIsAcceptSharingData(request.getAcceptSharingData());
+
         return new UserResponseDTO(this.userRepository.save(u));
     }
 
@@ -138,8 +142,10 @@ public class UserServiceImpl implements UserService {
         if (user.getLastName() != null)
             u.setLastName(user.getLastName());
 
-        userRepository.save(u);
+        if (user.getAcceptSharingData() != null)
+            u.setIsAcceptSharingData(user.getAcceptSharingData());
 
+        userRepository.save(u);
         return new UserResponseDTO(u);
 
     }

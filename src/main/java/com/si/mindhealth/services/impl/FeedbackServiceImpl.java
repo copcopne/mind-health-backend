@@ -11,6 +11,7 @@ import com.si.mindhealth.entities.Feedback;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.TargetType;
 import com.si.mindhealth.exceptions.ForbiddenException;
+import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.FeedbackRepository;
 import com.si.mindhealth.services.FeedbackService;
 import com.si.mindhealth.services.UserService;
@@ -52,6 +53,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    public Feedback get(TargetType targetType, Long targetId, User user) {
+        Optional<Feedback> optional = feedbackRepository.findByUserAndTargetTypeAndTargetId(user, targetType, targetId);
+        if (optional.isEmpty())
+            return null;
+        return optional.get();
+    }
+
+    @Override
     public Feedback get(Long FeedbackId, Principal principal) {
         Optional<Feedback> optional = feedbackRepository.findById(FeedbackId);
         if (optional.isEmpty())
@@ -61,8 +70,23 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public boolean exists(TargetType targetType, Long targetId, Principal principal) {
-        User user = userService.getUserByUsername(principal.getName());
+        User user = userService.getVerifiedUserByUsername(principal.getName());
         boolean isExists = feedbackRepository.existsByUserAndTargetTypeAndTargetId(user, targetType, targetId);
         return isExists;
+    }
+
+    @Override
+    public void delete(TargetType targetType, Long targetId, Principal principal) {
+        User u = userService.getVerifiedUserByUsername(principal.getName());
+        this.delete(targetType, targetId, u);
+    }
+
+    @Override
+    public void delete(TargetType targetType, Long targetId, User user) {
+        Feedback feedback = this.get(targetType, targetId, user);
+        if (feedback == null) {
+            throw new MyBadRequestException("Không tìm thấy đánh giá");
+        }
+        feedbackRepository.delete(feedback);
     }
 }

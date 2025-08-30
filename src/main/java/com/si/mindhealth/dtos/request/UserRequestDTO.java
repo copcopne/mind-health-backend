@@ -19,4 +19,7 @@ public class UserRequestDTO {
     private String oldPassword;
 
     private String password;
+
+    @JsonProperty(value = "accept_sharing_data")
+    private Boolean acceptSharingData;
 }

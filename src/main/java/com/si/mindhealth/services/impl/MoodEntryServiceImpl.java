@@ -54,7 +54,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         newEntry.setMoodLevel(request.getMoodLevel());
 
         MoodEntry entry = moodEntryRepository.save(newEntry);
-        moodResultService.CalculateResult(entry);
+        moodResultService.CalculateResult(entry, user);
         MoodEntryResponseDTO response = new MoodEntryResponseDTO(entry);
 
         return response;
@@ -152,7 +152,8 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
         // 4) Lưu & reprocess NLP
         moodEntryRepository.save(entry);
-        moodResultService.CalculateResult(entry); // giả sử method trả về MoodResult
+        User user = userService.getVerifiedUserByUsername(principal.getName());
+        moodResultService.CalculateResult(entry, user);
 
         boolean isEditable = true; // sau update vẫn còn trong cửa sổ sửa
         return new MoodEntryResponseDTO(entry, isEditable);
@@ -165,6 +166,10 @@ public class MoodEntryServiceImpl implements MoodEntryService {
             throw new NotFoundException("Không tìm thấy nhật ký này của bạn");
 
         moodEntryRepository.delete(entry);
+        User u = userService.getVerifiedUserByUsername(principal.getName());
+
+        if (u.getIsAcceptSharingData() == true)
+            feedbackService.delete(TargetType.MOOD_ENTRY, moodEntryId, u);
     }
 
     @Override

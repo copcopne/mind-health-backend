@@ -30,4 +30,6 @@ public class RegisterRequestDTO {
 
     @NotNull(message = "Giới tính không được để trống!")
     private Boolean gender;
+
+    private Boolean acceptSharingData;
 }

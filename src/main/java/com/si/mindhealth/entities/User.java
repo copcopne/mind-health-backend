@@ -39,6 +39,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, name = "is_verified")
     private Boolean isVerified;
 
+    @Column(nullable = false, name = "is_accept_sharing_data")
+    private Boolean isAcceptSharingData;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MoodEntry> moodEntries;
 
