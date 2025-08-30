@@ -1,4 +1,4 @@
-package com.si.mindhealth.services;
+package com.si.mindhealth.services.nlp;
 
 import com.si.mindhealth.entities.enums.MoodLevel;
 

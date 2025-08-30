@@ -14,12 +14,12 @@ import com.si.mindhealth.entities.enums.TopicType;
 import lombok.Data;
 
 @Data
-public class MoodEntryResponseDTO {
+public class MoodEntryDetailResponseDTO {
 
     private Long id;
 
-    @JsonProperty(value = "short_content")
-    private String shortContent;
+    @JsonProperty(value = "content")
+    private String content;
 
     @JsonProperty(value = "mood_level")
     private MoodLevel moodLevel;
@@ -39,23 +39,15 @@ public class MoodEntryResponseDTO {
     @JsonProperty(value = "is_editable")
     private Boolean isEditable;
 
-    public MoodEntryResponseDTO(MoodEntry moodEntry) {
-        this(moodEntry, null, true);
-    }
-
-    public MoodEntryResponseDTO(MoodEntry moodEntry, boolean isEditable) {
+    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, boolean isEditable) {
         this(moodEntry, null, isEditable);
     }
 
-    public MoodEntryResponseDTO(MoodEntry moodEntry, MoodResult result, boolean isEditable) {
+    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, MoodResult result, boolean isEditable) {
         this.id = moodEntry.getId();
         this.moodLevel = moodEntry.getMoodLevel();
+        this.content = moodEntry.getContent();
         this.isEditable = isEditable;
-
-        String content = moodEntry.getContent();
-        this.shortContent = content.length() > 100
-                ? content.substring(0, 100) + "..."
-                : content;
 
         if (result != null) {
             this.sentimentScore = result.getSentimentScore();

@@ -1,7 +1,5 @@
 package com.si.mindhealth.entities;
 
-import java.util.Set;
-
 import com.si.mindhealth.entities.enums.SupportTopic;
 import com.si.mindhealth.entities.enums.SupportType;
 
@@ -26,6 +24,4 @@ public class SupportContent extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @OneToMany(mappedBy = "supportContent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SupportResponse> supportResponses;
 }

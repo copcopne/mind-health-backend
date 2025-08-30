@@ -1,15 +1,24 @@
-package com.si.mindhealth.services;
+package com.si.mindhealth.services.nlp;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.si.mindhealth.dtos.TopicMultiResult;
 import com.si.mindhealth.dtos.TopicScore;
-import com.si.mindhealth.dtos.request.MoodEntryRequestDTO;
+import com.si.mindhealth.entities.MoodEntry;
+import com.si.mindhealth.entities.ProcessingLog;
 import com.si.mindhealth.entities.enums.MoodLevel;
 import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.TargetType;
+import com.si.mindhealth.repositories.ProcessingLogRepository;
+import com.si.mindhealth.services.TopicKeywordStore;
 import com.si.mindhealth.utils.Fuzzy;
 import com.si.mindhealth.utils.NormalizeInput;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TopicDetector {
 
     private final TopicKeywordStore store;
+    private final ProcessingLogRepository processingLogRepository;
+    private final ObjectMapper objectMapper;
 
     // cấu hình
     private static final int BIGRAM_BONUS = 2;
@@ -30,9 +41,10 @@ public class TopicDetector {
             "la", "thi", "minh", "hom", "nay", "khong", "rat", "hoi", "va", "muon", "du", "di", "choi", "tai",
             "khi", "cua", "cho", "lam", "vi");
 
-    public TopicMultiResult detectMulti(MoodEntryRequestDTO requestDTO) {
-        String rawNote = requestDTO.getContent();
-        MoodLevel userMood = requestDTO.getMoodLevel();
+    @Transactional
+    public TopicMultiResult detectMulti(MoodEntry moodEntry) {
+        String rawNote = moodEntry.getContent();
+        MoodLevel userMood = moodEntry.getMoodLevel();
         // 1) Chuẩn hoá
         String text = NormalizeInput.normalizeForMatch(rawNote);
         log.info("Normalized input: {}", text);
@@ -139,13 +151,12 @@ public class TopicDetector {
         }
 
         // === CRISIS BOOST: ép MENTAL_HEALTH nếu có tín hiệu khủng hoảng ===
-        boolean crisis = CrisisDetector.hasCrisisSignal(text); // text đã normalizeForMatch
+        boolean crisis = CrisisDetector.hasCrisisSignal(text); // text đã được chuẩn hóa
         if (crisis) {
             scores.merge(SupportTopic.MENTAL_HEALTH, 5, Integer::sum);
-            log.debug("CRISIS detected -> boost MENTAL_HEALTH +5");
         }
 
-        // 7) Lọc qua ngưỡng & sort
+        // 7) Lọc những topic qua ngưỡng & sort
         List<TopicScore> passed = scores.entrySet().stream()
                 .filter(e -> e.getValue() >= MIN_SCORE_TO_ASSIGN)
                 .map(e -> new TopicScore(e.getKey(), e.getValue()))
@@ -159,7 +170,7 @@ public class TopicDetector {
         }
 
         // 9) Chia topic chính và phụ
-        String primaryTopic = hits.isEmpty() ? SupportTopic.GENERAL.name() : hits.get(0).topic().name();
+        SupportTopic primaryTopic = hits.isEmpty() ? SupportTopic.GENERAL : hits.get(0).topic();
         List<TopicScore> otherTopics = hits.stream().skip(1).toList();
         int primaryScore = hits.isEmpty() ? 0 : hits.get(0).score();
 
@@ -176,7 +187,47 @@ public class TopicDetector {
         log.debug("mood: user={}, model={}, final={}, crisis={}, disagreed={}, overriddenByCrisis={}",
                 userMood, model, md.finalMood, crisis, md.disagreed, md.overriddenByCrisis);
 
-        // 12) Build DTO
+        // 12) build payload log
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("moodEntryId", moodEntry.getId());
+        payload.put("rawNote", rawNote);
+        payload.put("normalizedText", text);
+        payload.put("userMood", userMood != null ? userMood.name() : null);
+        payload.put("scores", scores.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue)));
+        payload.put("passed", passed.stream()
+                .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                .toList());
+        payload.put("hits", hits.stream()
+                .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                .toList());
+        payload.put("primaryTopic", primaryTopic.name());
+        payload.put("primaryScore", primaryScore);
+        payload.put("negRatio", negRatio);
+        payload.put("crisis", crisis);
+        payload.put("modelMood", model.name());
+        payload.put("finalMood", md.finalMood.name());
+        payload.put("disagreed", md.disagreed);
+        payload.put("overriddenByCrisis", md.overriddenByCrisis);
+
+        String jsonPayload;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payload);
+            log.info("NLP Processing Log: {}", jsonPayload);
+        } catch (Exception e) {
+            log.error("Failed to serialize processing log", e);
+            jsonPayload = "{}"; // fallback
+        }
+        
+        // 13) Lưu log
+        ProcessingLog logEntity = new ProcessingLog();
+        logEntity.setTargetType(TargetType.MOOD_ENTRY);
+        logEntity.setTargetId(moodEntry.getId());
+        logEntity.setPayload(jsonPayload);
+
+        processingLogRepository.save(logEntity);
+
+        // 14) Build DTO
         return new TopicMultiResult(
                 otherTopics, // các topic qua ngưỡng (đã limit & sort)
                 primaryTopic, // có thể null nếu không có hit nào

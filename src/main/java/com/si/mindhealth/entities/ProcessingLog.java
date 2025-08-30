@@ -13,6 +13,7 @@ import lombok.Setter;
 @Setter
 public class ProcessingLog extends BaseEntity {
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "target_type", nullable = false)
     private TargetType targetType;
 
@@ -20,5 +21,5 @@ public class ProcessingLog extends BaseEntity {
     private Long targetId;
 
     @Column(columnDefinition = "TEXT")
-    private String result;
+    private String payload;
 }

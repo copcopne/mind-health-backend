@@ -1,4 +1,4 @@
-package com.si.mindhealth.services;
+package com.si.mindhealth.services.nlp;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -8,7 +8,7 @@ public final class CrisisDetector {
   // Idiom loại trừ (không phải ý định tự hại)
   private static final List<Pattern> EXCLUDES = List.of(
       Pattern.compile("\\bchet\\s+cuoi\\b"),
-      Pattern.compile("\\bchet\\s+me\\b"),     // idiom/chửi miệng
+      Pattern.compile("\\bchet\\s+me\\b"), // idiom/chửi miệng
       Pattern.compile("\\bchet\\s+met\\b"),
       Pattern.compile("\\bchet\\s+lang\\b"),
       Pattern.compile("\\bchet\\s+chim\\b")

@@ -1,9 +1,6 @@
 package com.si.mindhealth.entities;
 
-import java.util.Set;
-
 import com.si.mindhealth.entities.enums.MoodLevel;
-import com.si.mindhealth.entities.enums.SupportTopic;
 
 import jakarta.persistence.*;
 
@@ -23,22 +20,10 @@ public class MoodEntry extends BaseEntity {
     @Column(nullable = false, length = 255)
     private String content;
 
-    @Column(name = "detected_topic")
-    private SupportTopic detectedTopic;
-
-    @Column(name = "is_crisis", nullable = false)
-    private Boolean isCrisis;
-
-    @OneToMany(mappedBy = "moodEntry", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SupportResponse> supportResponses;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @PostPersist
-    private void setCrisis() {
-        this.isCrisis = false;
-    }
-
+    @OneToOne(mappedBy = "moodEntry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MoodResult moodResult;
 }

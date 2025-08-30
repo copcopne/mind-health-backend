@@ -1,6 +1,7 @@
 package com.si.mindhealth.services.impl;
 
 import java.security.Principal;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,10 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final UserService userService;
 
     @Override
-    public FeedbackResponseDTO create(TargetType targetType, Long targetId, FeedbackRequestDTO request, Principal principal) {
-        User user = userService.getVerifiedUserByUsername(principal.getName());
-
-        if (feedbackRepository.existsByUserAndTargetTypeAndTargetId(user, targetType, targetId))
+    public FeedbackResponseDTO create(TargetType targetType, Long targetId, FeedbackRequestDTO request,
+            Principal principal) {
+        boolean isExists = this.exists(targetType, targetId, principal);
+        if (isExists == true)
             throw new ForbiddenException("Bạn đã phản hồi đánh giá mục này rồi!");
 
         Feedback feedback = new Feedback();
@@ -38,5 +39,30 @@ public class FeedbackServiceImpl implements FeedbackService {
         Feedback saved = feedbackRepository.save(feedback);
         FeedbackResponseDTO response = new FeedbackResponseDTO(saved);
         return response;
+    }
+
+    @Override
+    public Feedback get(TargetType targetType, Long targetId, Principal principal) {
+        User user = userService.getVerifiedUserByUsername(principal.getName());
+
+        Optional<Feedback> optional = feedbackRepository.findByUserAndTargetTypeAndTargetId(user, targetType, targetId);
+        if (optional.isEmpty())
+            return null;
+        return optional.get();
+    }
+
+    @Override
+    public Feedback get(Long FeedbackId, Principal principal) {
+        Optional<Feedback> optional = feedbackRepository.findById(FeedbackId);
+        if (optional.isEmpty())
+            return null;
+        return optional.get();
+    }
+
+    @Override
+    public boolean exists(TargetType targetType, Long targetId, Principal principal) {
+        User user = userService.getUserByUsername(principal.getName());
+        boolean isExists = feedbackRepository.existsByUserAndTargetTypeAndTargetId(user, targetType, targetId);
+        return isExists;
     }
 }

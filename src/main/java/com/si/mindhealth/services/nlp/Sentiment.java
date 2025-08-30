@@ -1,8 +1,8 @@
-package com.si.mindhealth.services;
+package com.si.mindhealth.services.nlp;
 
 import java.util.*;
 
-/** Sentiment tiếng Việt: Lexicon + Negation + Intensifier */
+/** Sentiment: Lexicon + Negation + Intensifier */
 public final class Sentiment {
 
     public record Result(double neg, double pos, double compound, double negRatio) {
