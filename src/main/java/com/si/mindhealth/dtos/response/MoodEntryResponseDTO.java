@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.MoodResultTopic;
@@ -26,7 +27,7 @@ public class MoodEntryResponseDTO {
 
     @JsonProperty(value = "main_topic")
     private SupportTopic mainTopic;
-
+    
     @JsonProperty(value = "other_topics")
     private Set<SupportTopic> otherTopics;
 

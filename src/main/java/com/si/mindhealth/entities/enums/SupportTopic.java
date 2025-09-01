@@ -1,5 +1,7 @@
 package com.si.mindhealth.entities.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum SupportTopic {
 
     GENERAL("Chung"),
@@ -28,6 +30,7 @@ public enum SupportTopic {
         this.label = label;
     }
 
+    @JsonValue
     public String getLabel() {
         return label;
     }

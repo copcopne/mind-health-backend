@@ -5,9 +5,11 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
+import com.si.mindhealth.entities.enums.OTPType;
 import com.si.mindhealth.exceptions.ForbiddenException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.UserRepository;
+import com.si.mindhealth.services.OTPService;
 import com.si.mindhealth.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OTPService otpService;
 
     @Override
     @Transactional
@@ -95,7 +98,11 @@ public class UserServiceImpl implements UserService {
             u.setIsAcceptSharingData(true);
         else u.setIsAcceptSharingData(request.getAcceptSharingData());
 
-        return new UserResponseDTO(this.userRepository.save(u));
+        UserResponseDTO newUserDTO = new UserResponseDTO(this.userRepository.save(u));
+
+        otpService.sendOTP(newUserDTO.getEmail(), OTPType.VERIFY);
+
+        return newUserDTO;
     }
 
     @Override

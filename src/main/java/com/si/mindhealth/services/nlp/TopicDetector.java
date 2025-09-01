@@ -151,11 +151,12 @@ public class TopicDetector {
         }
 
         // 7) Lọc những topic qua ngưỡng & sort
-        List<TopicScore> passed = scores.entrySet().stream()
-                .filter(e -> e.getValue() >= MIN_SCORE_TO_ASSIGN)
-                .map(e -> new TopicScore(e.getKey(), e.getValue()))
-                .sorted((a, b) -> Integer.compare(b.score(), a.score()))
-                .toList();
+        // đổi chỗ build passed một chút
+List<TopicScore> passed = scores.entrySet().stream()
+        .filter(e -> e.getValue() >= MIN_SCORE_TO_ASSIGN)
+        .map(e -> new TopicScore(e.getKey(), e.getValue())) // topic = enum
+        .sorted((a, b) -> Integer.compare(b.score(), a.score()))
+        .toList();
 
         // 8) Giới hạn số topic lại
         List<TopicScore> hits = passed;
@@ -164,7 +165,7 @@ public class TopicDetector {
         }
 
         // 9) Chia topic chính và phụ
-        SupportTopic primaryTopic = hits.isEmpty() ? SupportTopic.GENERAL : hits.get(0).topic();
+        String primaryTopic = hits.isEmpty() ? SupportTopic.GENERAL.getLabel() : hits.get(0).topic().getLabel();
         List<TopicScore> otherTopics = hits.stream().skip(1).toList();
         int primaryScore = hits.isEmpty() ? 0 : hits.get(0).score();
 
@@ -186,12 +187,17 @@ public class TopicDetector {
             payload.put("scores", scores.entrySet().stream()
                     .collect(Collectors.toMap(e -> e.getKey().name(), Map.Entry::getValue)));
             payload.put("passed", passed.stream()
-                    .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                    .map(ts -> Map.of(
+                            "topicLabel", ts.topic(),
+                            "score", ts.score()))
                     .toList());
+
             payload.put("hits", hits.stream()
-                    .map(ts -> Map.of("topic", ts.topic().name(), "score", ts.score()))
+                    .map(ts -> Map.of(
+                            "topicLabel", ts.topic(),
+                            "score", ts.score()))
                     .toList());
-            payload.put("primaryTopic", primaryTopic.name());
+            payload.put("primaryTopic", primaryTopic);
             payload.put("primaryScore", primaryScore);
             payload.put("negRatio", negRatio);
             payload.put("crisis", crisis);

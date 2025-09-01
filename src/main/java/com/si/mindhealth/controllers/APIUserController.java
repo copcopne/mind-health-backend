@@ -31,7 +31,7 @@ public class APIUserController {
                 .body(this.userService.addUser(request));
     }
 
-    @PatchMapping(path = "/users")
+    @PatchMapping(path = "/users/profile")
     public ResponseEntity<?> update(@Valid @RequestBody UserRequestDTO user, Principal principal) {
         return ResponseEntity
                 .status(HttpStatus.OK)

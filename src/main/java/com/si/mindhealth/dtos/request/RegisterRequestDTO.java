@@ -31,5 +31,6 @@ public class RegisterRequestDTO {
     @NotNull(message = "Giới tính không được để trống!")
     private Boolean gender;
 
+    @JsonProperty(value = "accept_sharing_data")
     private Boolean acceptSharingData;
 }

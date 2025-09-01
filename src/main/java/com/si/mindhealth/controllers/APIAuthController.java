@@ -39,14 +39,14 @@ public class APIAuthController {
                 .body(authService.refreshHandler(request));
     }
 
-    @PostMapping(path = "/email-verify/request")
+    @PostMapping(path = "/email-verify")
     public ResponseEntity<?> emailVerify(@Valid @RequestBody OTPRequestDTO request) {
         otpService.sendOTP(request.getEmail(), OTPType.VERIFY);
         return ResponseEntity
                 .ok().build();
     }
 
-    @PostMapping(path = "/email-verify")
+    @PostMapping(path = "/email-verify/verify")
     public ResponseEntity<?> verify(@Valid @RequestBody VerifyUserByOTPRequestDTO request) {
         otpService.verify(request, OTPType.VERIFY);
         return ResponseEntity
@@ -60,7 +60,7 @@ public class APIAuthController {
                 .ok().build();
     }
 
-    @PostMapping(path = "/reset-password")
+    @PostMapping(path = "/forgot-password/reset")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordByOTPRequestDTO request) {
         otpService.verify(request, OTPType.RESET_PASSWORD);
         return ResponseEntity

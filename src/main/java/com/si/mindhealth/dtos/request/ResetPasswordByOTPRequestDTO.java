@@ -13,7 +13,7 @@ public class ResetPasswordByOTPRequestDTO {
     @NotBlank(message = "Email không được để trống!")
     private String email;
 
-    @JsonProperty(value = "password")
+    @JsonProperty(value = "new_password")
     @NotBlank(message = "Mật khẩu không được để trống!")
     private String newPassword;
 

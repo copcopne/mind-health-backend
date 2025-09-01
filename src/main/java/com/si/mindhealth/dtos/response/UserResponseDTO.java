@@ -10,6 +10,8 @@ public class UserResponseDTO {
 
     private Long id;
 
+    private String username;
+
     private String email;
 
     @JsonProperty(value = "first_name")
@@ -28,6 +30,33 @@ public class UserResponseDTO {
     @JsonProperty(value = "is_verified")
     private Boolean isVerified;
 
+    @JsonProperty(value = "accept_sharing_data")
+    private Boolean isAcceptSharingData;
+
+    private String maskEmail(String email) {
+        if (email == null || !email.contains("@"))
+            return email;
+
+        String[] parts = email.split("@");
+        String name = parts[0];
+        String domain = parts[1];
+
+        // giữ lại 2 ký tự đầu và 1 ký tự cuối
+        int start = Math.min(2, name.length()); // tối đa 2 ký tự đầu
+        int end = Math.max(1, name.length() - 1); // ít nhất 1 ký tự cuối
+
+        if (name.length() <= 3) {
+            // nếu quá ngắn thì không cần che
+            return name + "@" + domain;
+        }
+
+        String visibleStart = name.substring(0, start);
+        String visibleEnd = name.substring(end);
+        String maskedMid = "*".repeat(end - start);
+
+        return visibleStart + maskedMid + visibleEnd + "@" + domain;
+    }
+
     public UserResponseDTO(User user) {
         this.setFirstName(user.getFirstName());
         this.setLastName(user.getLastName());
@@ -36,6 +65,9 @@ public class UserResponseDTO {
         this.setRole(user.getRole());
         this.setIsActive(user.getIsActive());
         this.setIsVerified(user.getIsVerified());
-        this.setEmail(user.getEmail());
+        this.setUsername(user.getUsername());
+        this.setEmail(maskEmail(user.getEmail()));
+        this.setIsAcceptSharingData(user.getIsAcceptSharingData());
     }
+
 }
