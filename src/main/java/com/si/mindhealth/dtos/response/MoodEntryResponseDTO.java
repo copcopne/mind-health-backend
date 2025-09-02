@@ -1,5 +1,6 @@
 package com.si.mindhealth.dtos.response;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,9 @@ public class MoodEntryResponseDTO {
     @JsonProperty(value = "is_editable")
     private Boolean isEditable;
 
+    @JsonProperty(value = "created_at")
+    private Instant createdAt;
+
     public MoodEntryResponseDTO(MoodEntry moodEntry) {
         this(moodEntry, null, true);
     }
@@ -52,6 +56,7 @@ public class MoodEntryResponseDTO {
         this.id = moodEntry.getId();
         this.moodLevel = moodEntry.getMoodLevel();
         this.isEditable = isEditable;
+        this.createdAt = moodEntry.getCreatedAt();
 
         String content = moodEntry.getContent();
         this.shortContent = content.length() > 100

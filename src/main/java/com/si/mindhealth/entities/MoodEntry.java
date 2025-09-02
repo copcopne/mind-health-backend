@@ -17,7 +17,7 @@ public class MoodEntry extends BaseEntity {
     @Column(nullable = false, name = "mood_level")
     private MoodLevel moodLevel;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
