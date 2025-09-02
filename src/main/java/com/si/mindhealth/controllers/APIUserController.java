@@ -2,6 +2,9 @@ package com.si.mindhealth.controllers;
 
 import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
+import com.si.mindhealth.dtos.response.UserResponseDTO;
+import com.si.mindhealth.entities.enums.OTPType;
+import com.si.mindhealth.services.OTPService;
 import com.si.mindhealth.services.UserService;
 
 import jakarta.validation.Valid;
@@ -23,12 +26,15 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class APIUserController {
     private final UserService userService;
+    private final OTPService otpService;
 
     @PostMapping(path = "/users")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO request) {
+        UserResponseDTO responseDTO = this.userService.addUser(request);
+        otpService.sendOTP(responseDTO.getEmail(), OTPType.VERIFY);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(this.userService.addUser(request));
+                .body(responseDTO);
     }
 
     @PatchMapping(path = "/users/profile")

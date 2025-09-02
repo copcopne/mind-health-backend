@@ -27,10 +27,6 @@ public class MoodResult extends BaseEntity {
     @JoinColumn(name = "mood_entry_id", nullable = false, unique = true)
     private MoodEntry moodEntry;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "main_topic", nullable = false)
-    private SupportTopic mainTopic;
-
     @Column(name = "is_crisis", nullable = false)
     private Boolean isCrisis;
 

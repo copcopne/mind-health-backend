@@ -32,6 +32,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new ForbiddenException("Bạn đã phản hồi đánh giá mục này rồi!");
 
         Feedback feedback = new Feedback();
+        feedback.setUser(userService.getVerifiedUserByUsername(principal.getName()));
         feedback.setTargetType(targetType);
         feedback.setTargetId(targetId);
         feedback.setSatisfyLevel(request.getSatisfyLevel());

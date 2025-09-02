@@ -11,7 +11,7 @@ public class FeedbackRequestDTO {
 
     @JsonProperty(value = "satisfy_level")
     @NotNull(message = "Mức độ hài lòng là bắt buộc!")
-    private SatisfyLevel satisfyLevel;
+    private SatisfyLevel satisfyLevel;  
 
     private String content;
 }

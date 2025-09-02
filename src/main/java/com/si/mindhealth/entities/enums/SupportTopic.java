@@ -1,6 +1,10 @@
 package com.si.mindhealth.entities.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.si.mindhealth.utils.NormalizeInput;
 
 public enum SupportTopic {
 
@@ -34,4 +38,26 @@ public enum SupportTopic {
     public String getLabel() {
         return label;
     }
+
+    private static final Map<String, SupportTopic> LOOKUP = new HashMap<>();
+
+    static {
+        for (SupportTopic t : values()) {
+            // enum name (upper-case)
+            LOOKUP.put(t.name().toUpperCase(), t);
+            // nhãn vi (exact)
+            LOOKUP.put(t.getLabel(), t);
+        }
+    }
+
+    public static SupportTopic fromString(String s) {
+        if (s == null)
+            return GENERAL;
+        SupportTopic t = LOOKUP.get(s.toUpperCase());
+        if (t == null) {
+            t = LOOKUP.get(s);
+        }
+        return t != null ? t : GENERAL;
+    }
+
 }

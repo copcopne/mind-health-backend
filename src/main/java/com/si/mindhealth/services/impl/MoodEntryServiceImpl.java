@@ -168,7 +168,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         moodEntryRepository.delete(entry);
         User u = userService.getVerifiedUserByUsername(principal.getName());
 
-        if (u.getIsAcceptSharingData() == true)
+        if (u.getIsAcceptSharingData() == false)
             feedbackService.delete(TargetType.MOOD_ENTRY, moodEntryId, u);
     }
 

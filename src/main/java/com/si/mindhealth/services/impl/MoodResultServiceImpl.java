@@ -40,7 +40,7 @@ public class MoodResultServiceImpl implements MoodResultService {
 
         // Them topic chinh
         MoodResultTopic t = new MoodResultTopic();
-        t.setTopic(SupportTopic.valueOf(resuls.primaryTopic()));
+        t.setTopic(SupportTopic.fromString(resuls.primaryTopic()));
         t.setType(TopicType.MAIN_TOPIC);
         t.setMoodResult(r);
         r.getTopics().add(t);

@@ -65,7 +65,7 @@ public class APIMoodEntryController {
     }
 
     @PostMapping(path = "/mood-entries/{id}/feedback")
-    public ResponseEntity<?> feedback(@PathVariable Long id, @Valid FeedbackRequestDTO request, Principal principal) {
+    public ResponseEntity<?> feedback(@PathVariable Long id, @Valid @RequestBody FeedbackRequestDTO request, Principal principal) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(moodEntryService.feedback(id, request, principal));
