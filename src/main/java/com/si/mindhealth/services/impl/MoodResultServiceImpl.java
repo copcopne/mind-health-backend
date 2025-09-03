@@ -30,38 +30,52 @@ public class MoodResultServiceImpl implements MoodResultService {
     @Async
     @Transactional
     public void CalculateResult(MoodEntry entry, User user) {
-        TopicMultiResult resuls = topicDetector.detectMulti(entry, user.getIsAcceptSharingData());
+        // Chạy NLP
+        TopicMultiResult results = topicDetector.detectMulti(entry, user.getIsAcceptSharingData());
 
-        MoodResult r = new MoodResult();
-        r.setMoodEntry(entry);
-        r.setTopics(new HashSet<>());
-        r.setIsCrisis(resuls.isCrisis());
-        r.setSentimentScore(resuls.sentimentScore());
+        // ===== UP SERT THEO @MapsId (id của MoodResult == entry.getId()) =====
+        Long entryId = entry.getId();
+        MoodResult r = moodResultRepository.findById(entryId).orElseGet(() -> {
+            // tạo mới và gắn association - KHÔNG set id thủ công
+            MoodResult nr = new MoodResult();
+            nr.setMoodEntry(entry); // @MapsId sẽ đồng bộ id = entryId
+            return nr;
+        });
 
-        // Them topic chinh
-        MoodResultTopic t = new MoodResultTopic();
-        t.setTopic(SupportTopic.fromString(resuls.primaryTopic()));
-        t.setType(TopicType.MAIN_TOPIC);
-        t.setMoodResult(r);
-        r.getTopics().add(t);
-         
-        // Them cac topic phu neu co
-        for(var topic: resuls.otherTopics()) { 
-            MoodResultTopic mrt = new MoodResultTopic();
-            mrt.setTopic(topic.topic());
-            mrt.setType(TopicType.SUB_TOPIC);
-            mrt.setMoodResult(r);
-            r.getTopics().add(mrt);
+        // cập nhật các trường tính toán
+        r.setIsCrisis(results.isCrisis());
+        r.setSentimentScore(results.sentimentScore());
+
+        // ===== Rebuild topics an toàn để tránh duplicate =====
+        if (r.getTopics() == null) {
+            r.setTopics(new HashSet<>());
+        } else {
+            r.getTopics().clear(); // orphanRemoval=true sẽ xoá record con cũ
         }
-        
+
+        // Topic chính
+        MoodResultTopic main = new MoodResultTopic();
+        main.setTopic(SupportTopic.fromString(results.primaryTopic()));
+        main.setType(TopicType.MAIN_TOPIC);
+        main.setMoodResult(r);
+        r.getTopics().add(main);
+
+        // Các topic phụ (nếu có)
+        for (var topic : results.otherTopics()) {
+            MoodResultTopic sub = new MoodResultTopic();
+            sub.setTopic(topic.topic());
+            sub.setType(TopicType.SUB_TOPIC);
+            sub.setMoodResult(r);
+            r.getTopics().add(sub);
+        }
+
+        // Lưu (UPDATE nếu đã tồn tại, INSERT nếu lần đầu)
         moodResultRepository.save(r);
     }
 
     @Override
     public MoodResult getResult(MoodEntry entry) {
         Optional<MoodResult> result = moodResultRepository.findByMoodEntry(entry);
-        if (result.isEmpty())
-            return null;
-        return result.get();
+        return result.orElse(null);
     }
 }

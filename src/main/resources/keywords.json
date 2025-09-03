@@ -90,6 +90,11 @@
     "tiet kiem",
     "no nan",
     "luong",
+    "thuong tet",
+    "thuong luong",
+    "luong thuong",
+    "thue",
+    "no thue",
     "thu nhap",
     "vay no",
     "tra no",
@@ -101,7 +106,10 @@
     "ngan hang",
     "kho khan tai chinh",
     "thieu tien",
-    "mat tien"
+    "mat tien",
+    "li xi",
+    "momo",
+    "zalopay"
   ],
   "HEALTH": [
     "suc khoe",

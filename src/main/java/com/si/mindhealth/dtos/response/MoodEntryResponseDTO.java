@@ -38,9 +38,6 @@ public class MoodEntryResponseDTO {
     @JsonProperty(value = "is_crisis")
     private Boolean isCrisis;
 
-    @JsonProperty(value = "is_editable")
-    private Boolean isEditable;
-
     @JsonProperty(value = "created_at")
     private Instant createdAt;
 
@@ -55,7 +52,6 @@ public class MoodEntryResponseDTO {
     public MoodEntryResponseDTO(MoodEntry moodEntry, MoodResult result, boolean isEditable) {
         this.id = moodEntry.getId();
         this.moodLevel = moodEntry.getMoodLevel();
-        this.isEditable = isEditable;
         this.createdAt = moodEntry.getCreatedAt();
 
         String content = moodEntry.getContent();

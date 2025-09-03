@@ -1,7 +1,6 @@
 package com.si.mindhealth.entities.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum SatisfyLevel {
     VERY_BAD(-2, "Rất tệ"),
@@ -22,7 +21,6 @@ public enum SatisfyLevel {
         return value;
     }
 
-    @JsonValue
     public String getLabel() {
         return label;
     }

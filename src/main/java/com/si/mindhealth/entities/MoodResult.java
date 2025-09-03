@@ -2,15 +2,12 @@ package com.si.mindhealth.entities;
 
 import java.util.Set;
 
-import com.si.mindhealth.entities.enums.SupportTopic;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -24,6 +21,7 @@ import lombok.Setter;
 public class MoodResult extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "mood_entry_id", nullable = false, unique = true)
     private MoodEntry moodEntry;
 

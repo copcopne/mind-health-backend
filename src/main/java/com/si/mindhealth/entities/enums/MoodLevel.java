@@ -2,11 +2,11 @@ package com.si.mindhealth.entities.enums;
 
 public enum MoodLevel {
 
-    NEGATIVE(-2, "Tiêu cực"),
-    SLIGHTLY_NEGATIVE(-1, "Hơi tiêu cực"),
-    NEUTRAL(0, "Trung tính"),
-    SLIGHTLY_POSITIVE(1, "Hơi tích cực"),
-    POSITIVE(2, "Tích cực");
+    VERY_BAD(-2, "Tiêu cực"),
+    BAD(-1, "Hơi tiêu cực"),
+    NORMAL(0, "Bình thường"),
+    GOOD(1, "Hơi tích cực"),
+    EXCELLENT(2, "Tích cực");
 
     private final int value;
     private final String label;

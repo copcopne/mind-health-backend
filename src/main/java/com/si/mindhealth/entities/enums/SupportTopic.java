@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.si.mindhealth.utils.NormalizeInput;
 
 public enum SupportTopic {
 

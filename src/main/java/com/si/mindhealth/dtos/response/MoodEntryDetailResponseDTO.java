@@ -37,21 +37,25 @@ public class MoodEntryDetailResponseDTO {
     @JsonProperty(value = "is_crisis")
     private Boolean isCrisis;
 
-    @JsonProperty(value = "is_editable")
-    private Boolean isEditable;
+    @JsonProperty(value = "can_edit")
+    private Boolean canEdit;
+
+    @JsonProperty(value = "can_feedback")
+    private Boolean canFeedback;
     
     @JsonProperty(value = "created_at")
     private Instant createdAt;
 
-    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, boolean isEditable) {
-        this(moodEntry, null, isEditable);
+    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, boolean canEdit) {
+        this(moodEntry, null, canEdit, true);
     }
 
-    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, MoodResult result, boolean isEditable) {
+    public MoodEntryDetailResponseDTO(MoodEntry moodEntry, MoodResult result, boolean canEdit, boolean canFeedback) {
         this.id = moodEntry.getId();
         this.moodLevel = moodEntry.getMoodLevel();
         this.content = moodEntry.getContent();
-        this.isEditable = isEditable;
+        this.canEdit = canEdit;
+        this.canFeedback = canFeedback;
         this.createdAt = moodEntry.getCreatedAt();
 
         if (result != null) {

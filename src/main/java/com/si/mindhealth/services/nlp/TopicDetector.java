@@ -1,6 +1,7 @@
 package com.si.mindhealth.services.nlp;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -40,6 +41,29 @@ public class TopicDetector {
     private static final Set<String> STOPWORDS = Set.of(
             "la", "thi", "minh", "hom", "nay", "khong", "rat", "hoi", "va", "muon", "du", "di", "choi", "tai",
             "khi", "cua", "cho", "lam", "vi");
+
+    // 100k, 2.5k, 50 k
+private static final Pattern MONEY_K = Pattern.compile(
+    "\\b\\d+(?:[.,]\\d+)?\\s?k\\b",
+    Pattern.CASE_INSENSITIVE
+);
+
+// Số + (ngan|nghin): 3 ngan, 10 nghin, 2.5 ngan...
+private static final Pattern MONEY_NGAN_NUMBER = Pattern.compile(
+    "\\b\\d+(?:[.,]\\d+)?\\s*(?:ngan|nghin)\\b",
+    Pattern.CASE_INSENSITIVE
+);
+
+// (chuc|tram) + (ngan|nghin): chuc ngan, tram nghin, vai chuc ngan (vẫn match phần "chuc ngan")
+private static final Pattern MONEY_NGAN_WORD = Pattern.compile(
+    "\\b(?:chuc|tram)\\s+(?:ngan|nghin)\\b",
+    Pattern.CASE_INSENSITIVE
+);
+
+// 10.000 / 100,000 / 1.000.000 (ngưỡng nghìn trở lên có nhóm 3 số)
+private static final Pattern MONEY_THOUSANDS_GROUPED = Pattern.compile(
+    "\\b\\d{1,3}(?:[.,]\\d{3})+\\b"
+);
 
     @Transactional
     public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog) {
@@ -138,6 +162,18 @@ public class TopicDetector {
                 score += 1;
             }
             if (topic == SupportTopic.LONELINESS && filteredPadded.contains(" co don ")) {
+                score += 1;
+            }
+
+            if (topic == SupportTopic.MONEY &&
+                    (filteredPadded.contains(" li xi ")
+                    || filteredPadded.contains(" mung tuoi ")
+                    || (filteredPadded.contains(" thuong tet ") 
+                    || filteredPadded.contains(" tien thuong "))
+                    || MONEY_K.matcher(filteredPadded).find()
+                    || MONEY_NGAN_NUMBER.matcher(filteredPadded).find()
+                    || MONEY_NGAN_WORD.matcher(filteredPadded).find()
+                    || MONEY_THOUSANDS_GROUPED.matcher(filteredPadded).find())) {
                 score += 1;
             }
 

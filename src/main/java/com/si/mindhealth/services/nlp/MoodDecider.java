@@ -29,7 +29,7 @@ public final class MoodDecider {
 
         // 1) Crisis override
         if (crisis) {
-            MoodLevel fin = MoodLevel.NEGATIVE;
+            MoodLevel fin = MoodLevel.VERY_BAD;
             boolean disagreed = userMoodNullable != null && distance(userMoodNullable, fin) > 1;
             return new Decision(userMoodNullable, model, fin, true, disagreed, true);
         }
@@ -54,9 +54,9 @@ public final class MoodDecider {
         // “phanh” theo độ mạnh của cảm xúc để tránh quá lạc quan/bi quan:
         double n = r.negRatio();
         if (n >= 0.90)
-            blendedVal = Math.min(blendedVal, MoodLevel.SLIGHTLY_NEGATIVE.getValue());
+            blendedVal = Math.min(blendedVal, MoodLevel.BAD.getValue());
         if (n <= 0.10)
-            blendedVal = Math.max(blendedVal, MoodLevel.SLIGHTLY_POSITIVE.getValue());
+            blendedVal = Math.max(blendedVal, MoodLevel.GOOD.getValue());
 
         MoodLevel fin = MoodLevel.fromValue(blendedVal);
         return new Decision(user, model, fin, false, true, false);

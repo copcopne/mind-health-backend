@@ -24,6 +24,7 @@ import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.TargetType;
 import com.si.mindhealth.exceptions.ForbiddenException;
+import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.exceptions.NotFoundException;
 import com.si.mindhealth.repositories.MoodEntryRepository;
 import com.si.mindhealth.services.FeedbackService;
@@ -46,6 +47,11 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
     @Override
     public MoodEntryResponseDTO create(MoodEntryRequestDTO request, Principal principal) {
+        if (request.getMoodLevel() == null)
+            throw new MyBadRequestException("Bạn chưa phân loại cảm xúc!");
+        if (request.getContent() == null || request.getContent().isBlank())
+            throw new MyBadRequestException("Bạn chưa nhập tâm trạng của mình!");
+
         User user = userService.getVerifiedUserByUsername(principal.getName());
         MoodEntry newEntry = new MoodEntry();
 
@@ -67,8 +73,9 @@ public class MoodEntryServiceImpl implements MoodEntryService {
             throw new NotFoundException("Không tìm thấy nhật ký này của bạn");
 
         MoodResult result = m.getMoodResult();
-        boolean isEditable = !feedbackService.exists(TargetType.MOOD_ENTRY, id, principal);
-        MoodEntryDetailResponseDTO response = new MoodEntryDetailResponseDTO(m, result, isEditable);
+        boolean canFeedback = !feedbackService.exists(TargetType.MOOD_ENTRY, id, principal);
+        boolean canEdit = this.canEdit(m);
+        MoodEntryDetailResponseDTO response = new MoodEntryDetailResponseDTO(m, result, canEdit, canFeedback);
         return response;
     }
 
@@ -90,7 +97,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         // map với cả result nếu có
         Page<MoodEntryResponseDTO> dtoPage = pageData.map(entry -> {
             MoodResult result = entry.getMoodResult();
-            boolean isEditable = !feedbackService.exists(TargetType.MOOD_ENTRY, entry.getId(), principal);
+            boolean isEditable = this.canFeedback(entry, principal);
             return new MoodEntryResponseDTO(entry, result, isEditable);
         });
 
@@ -111,9 +118,20 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         return this.feedbackService.create(TargetType.MOOD_ENTRY, id, request, principal);
     }
 
+    private boolean canEdit(MoodEntry entry) {
+        var createdAt = entry.getCreatedAt();
+        var now = Instant.now();
+        long hours = Duration.between(createdAt, now).toHours();
+        return (hours <= MAX_EDIT_HOURS);
+    }
+
+    private boolean canFeedback(MoodEntry entry, Principal principal) {
+        return !feedbackService.exists(entry, principal);
+    }
+
     @Override
     @Transactional
-    public MoodEntryResponseDTO update(Long moodEntryId, MoodEntryRequestDTO request, Principal principal) {
+    public MoodEntryDetailResponseDTO update(Long moodEntryId, MoodEntryRequestDTO request, Principal principal) {
         MoodEntry entry = this.getMood(moodEntryId, principal);
         if (entry == null) {
             throw new NotFoundException("Không tìm thấy nhật ký này của bạn");
@@ -126,37 +144,41 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         }
 
         // 2) Chặn nếu quá thời gian cho phép
-        var createdAt = entry.getCreatedAt();
-        var now = Instant.now();
-        long hours = Duration.between(createdAt, now).toHours();
-        if (hours > MAX_EDIT_HOURS) {
+        boolean canEdit = canEdit(entry);
+        if (!canEdit) {
             throw new ForbiddenException(
                     "Đã quá thời gian cho phép chỉnh sửa (" + MAX_EDIT_HOURS + " giờ). Vui lòng tạo bản mới.");
         }
 
         // 3) Áp dụng thay đổi (nếu có)
         boolean changed = false;
+        boolean changedContent = false;
         if (request.getContent() != null && !request.getContent().equals(entry.getContent())) {
             entry.setContent(request.getContent());
             changed = true;
+            changedContent = true;
         }
         if (request.getMoodLevel() != null && request.getMoodLevel() != entry.getMoodLevel()) {
             entry.setMoodLevel(request.getMoodLevel());
             changed = true;
         }
+        boolean canFeedback = this.canFeedback(entry, principal);
         if (!changed) {
             // Không đổi gì -> trả về trạng thái hiện tại
             boolean isEditable = true; // chưa có feedback & còn trong thời gian => vẫn sửa tiếp được
-            return new MoodEntryResponseDTO(entry, entry.getMoodResult(), isEditable);
+            return new MoodEntryDetailResponseDTO(entry, entry.getMoodResult(), isEditable, canFeedback);
         }
 
-        // 4) Lưu & reprocess NLP
+        // 4) Lưu & reprocess NLP nếu có cập nhật content
         moodEntryRepository.save(entry);
+        boolean isEditable = true;
         User user = userService.getVerifiedUserByUsername(principal.getName());
-        moodResultService.CalculateResult(entry, user);
-
-        boolean isEditable = true; // sau update vẫn còn trong cửa sổ sửa
-        return new MoodEntryResponseDTO(entry, isEditable);
+        if (changedContent) {
+            moodResultService.CalculateResult(entry, user);
+            return new MoodEntryDetailResponseDTO(entry, null, isEditable, canFeedback);
+        }
+        // Không cập nhật content -> Lấy kết quả cũ
+        return new MoodEntryDetailResponseDTO(entry, entry.getMoodResult(), isEditable, canFeedback);
     }
 
     @Override

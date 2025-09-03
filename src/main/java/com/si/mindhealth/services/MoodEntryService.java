@@ -14,7 +14,7 @@ import com.si.mindhealth.entities.MoodEntry;
 public interface MoodEntryService {
     MoodEntryResponseDTO create(MoodEntryRequestDTO request, Principal principal);
 
-    MoodEntryResponseDTO update(Long moodEntryId, MoodEntryRequestDTO request, Principal principal);
+    MoodEntryDetailResponseDTO update(Long moodEntryId, MoodEntryRequestDTO request, Principal principal);
 
     void delete(Long moodEntryId, Principal principal);
 
