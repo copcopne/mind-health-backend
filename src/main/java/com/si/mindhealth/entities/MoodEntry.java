@@ -1,5 +1,6 @@
 package com.si.mindhealth.entities;
 
+import com.si.mindhealth.converters.MoodLevelConverter;
 import com.si.mindhealth.entities.enums.MoodLevel;
 
 import jakarta.persistence.*;
@@ -14,6 +15,7 @@ import lombok.Setter;
 public class MoodEntry extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
+    @Convert(converter = MoodLevelConverter.class)
     @Column(nullable = false, name = "mood_level")
     private MoodLevel moodLevel;
 

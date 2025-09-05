@@ -70,4 +70,10 @@ public class APIMoodEntryController {
                 .status(HttpStatus.OK)
                 .body(moodEntryService.feedback(id, request, principal));
     }
+    @GetMapping(path = "users/profile/stats")
+    public ResponseEntity<?> getStats(@RequestParam Map<String, String> params, Principal principal) {
+        return ResponseEntity
+                    .ok()
+                    .body(moodEntryService.getStats(params, principal));
+    }
 }

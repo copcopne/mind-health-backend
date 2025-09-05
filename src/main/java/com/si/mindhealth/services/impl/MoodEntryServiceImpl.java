@@ -3,8 +3,14 @@ package com.si.mindhealth.services.impl;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Page;
@@ -19,6 +25,7 @@ import com.si.mindhealth.dtos.response.FeedbackResponseDTO;
 import com.si.mindhealth.dtos.response.MoodEntryDetailResponseDTO;
 import com.si.mindhealth.dtos.response.MoodEntryResponseDTO;
 import com.si.mindhealth.dtos.response.PageResponseDTO;
+import com.si.mindhealth.dtos.response.StatsResponseDTO;
 import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.User;
@@ -27,6 +34,7 @@ import com.si.mindhealth.exceptions.ForbiddenException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.exceptions.NotFoundException;
 import com.si.mindhealth.repositories.MoodEntryRepository;
+import com.si.mindhealth.repositories.projections.DailyMoodIndexView;
 import com.si.mindhealth.services.FeedbackService;
 import com.si.mindhealth.services.MoodEntryService;
 import com.si.mindhealth.services.MoodResultService;
@@ -213,4 +221,54 @@ public class MoodEntryServiceImpl implements MoodEntryService {
             return null;
         return entry.get();
     }
+
+    @Override
+    public List<StatsResponseDTO> getStats(Map<String, String> params, Principal principal) {
+        User user = userService.getVerifiedUserByUsername(principal.getName());
+
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+
+        // Parse params
+        LocalDate from;
+        LocalDate to;
+        try {
+            from = params.containsKey("from")
+                    ? LocalDate.parse(params.get("from"))
+                    : null;
+            to = params.containsKey("to")
+                    ? LocalDate.parse(params.get("to"))
+                    : null;
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid date format, must be yyyy-MM-dd", e);
+        }
+
+        if (from == null && to == null) {
+            to = LocalDate.now(zoneId);
+            from = to.minusDays(29);
+        } else if (from == null) {
+            from = to.minusDays(29);
+        } else if (to == null) {
+            to = from.plusDays(29);
+        }
+
+        Instant fromInstant = from.atStartOfDay(zoneId).toInstant();
+        Instant toInstant = to.plusDays(1).atStartOfDay(zoneId).toInstant();
+
+        // Lấy dữ liệu thống kê
+        List<DailyMoodIndexView> raw = moodEntryRepository.aggregateDailyMood(user, fromInstant, toInstant);
+
+        // Map thành Map<LocalDate, Double>
+        Map<LocalDate, Double> byDay = raw.stream()
+                .collect(Collectors.toMap(DailyMoodIndexView::getDay, DailyMoodIndexView::getMoodIndex));
+
+        // Fill ngày trống & map sang StatsResponseDTO
+        List<StatsResponseDTO> result = new ArrayList<>();
+        for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
+            Double val = byDay.getOrDefault(d, null);
+            result.add(new StatsResponseDTO(d, val));
+        }
+
+        return result;
+    }
+
 }
