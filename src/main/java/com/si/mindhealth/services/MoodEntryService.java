@@ -10,6 +10,7 @@ import com.si.mindhealth.dtos.response.MoodEntryDetailResponseDTO;
 import com.si.mindhealth.dtos.response.MoodEntryResponseDTO;
 import com.si.mindhealth.dtos.response.PageResponseDTO;
 import com.si.mindhealth.entities.MoodEntry;
+import com.si.mindhealth.entities.User;
 
 public interface MoodEntryService {
     MoodEntryResponseDTO create(MoodEntryRequestDTO request, Principal principal);
@@ -21,6 +22,8 @@ public interface MoodEntryService {
     MoodEntryDetailResponseDTO get(Long id, Principal principal);
 
     MoodEntry getMood(Long id, Principal principal);
+    
+    MoodEntry getLastest(User user);
 
     PageResponseDTO<MoodEntryResponseDTO> getList(Map<String, String> parmas, Principal principal);
 

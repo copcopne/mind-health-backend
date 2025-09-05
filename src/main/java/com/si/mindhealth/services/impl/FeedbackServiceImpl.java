@@ -124,4 +124,16 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw new MyBadRequestException("Không tìm thấy phản hồi!");
         feedbackRepository.delete(feedback);
     }
+
+    @Override
+    public FeedbackResponseDTO update(Long id, FeedbackRequestDTO request, Principal principal) {
+        Feedback feedback = this.get(id, principal);
+        if (feedback == null)
+            throw new ForbiddenException("Bạn không có quyền chỉnh sửa đánh giá này!");
+            
+        feedback.setContent(request.getContent());
+        feedback.setSatisfyLevel(request.getSatisfyLevel());
+        FeedbackResponseDTO response = new FeedbackResponseDTO(feedbackRepository.save(feedback));
+        return response;
+    }
 }

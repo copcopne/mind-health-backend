@@ -74,7 +74,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
 
         MoodResult result = m.getMoodResult();
         boolean canFeedback = !feedbackService.exists(TargetType.MOOD_ENTRY, id, principal);
-        boolean canEdit = this.canEdit(m);
+        boolean canEdit = this.canEdit(m) && canFeedback;
         MoodEntryDetailResponseDTO response = new MoodEntryDetailResponseDTO(m, result, canEdit, canFeedback);
         return response;
     }
@@ -204,5 +204,13 @@ public class MoodEntryServiceImpl implements MoodEntryService {
             return null;
 
         return optional.get();
+    }
+
+    @Override
+    public MoodEntry getLastest(User user) {
+        Optional<MoodEntry> entry = moodEntryRepository.findTopByUserOrderByCreatedAtDesc(user);
+        if (entry.isEmpty())
+            return null;
+        return entry.get();
     }
 }

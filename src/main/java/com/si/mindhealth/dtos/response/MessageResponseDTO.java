@@ -20,10 +20,22 @@ public class MessageResponseDTO {
     @JsonProperty(value = "created_at")
     private Instant createdAt;
 
+    @JsonProperty(value = "is_crisis")
+    private boolean crisis;
+
+    @JsonProperty(value = "can_feedback")
+    private boolean canFeedback;
+
     public MessageResponseDTO(Message message) {
+        this(message, false, true);
+    }
+
+    public MessageResponseDTO(Message message, boolean isCrisis, boolean canFeedback) {
         this.id = message.getId();
         this.sender = message.getSender();
         this.content = message.getContent();
         this.createdAt = message.getCreatedAt();
+        this.crisis = isCrisis;
+        this.canFeedback = canFeedback;
     }
 }

@@ -16,6 +16,7 @@ public interface FeedbackService {
     Feedback get(Long FeedbackId, Principal principal);
     Feedback get(TargetType targetType, Long targetId, User user);
     FeedbackResponseDTO get(GetFeedbackRequestDTO request, Principal principal);
+    FeedbackResponseDTO update(Long id, FeedbackRequestDTO request, Principal principal);
     boolean exists(TargetType targetType, Long targetId, Principal principal);
     boolean exists(MoodEntry entry, Principal principal);
     void delete(TargetType targetType, Long targetId, Principal principal);

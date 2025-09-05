@@ -1,5 +1,7 @@
 package com.si.mindhealth.repositories;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +14,9 @@ import com.si.mindhealth.entities.enums.Sender;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
     Page<Message> findByUser(User user, Pageable pageable);
-    Optional<Message> findFirstByOrderByCreatedAtDesc();
+    Optional<Message> findFirstByUserOrderByCreatedAtDesc(User user);
     Optional<Message> findFirstByUserAndSenderOrderByCreatedAtDesc(User user, Sender sender);
+    List<Message> findTop4ByUserAndSenderOrderByCreatedAtDesc(User user, Sender sender);
+    boolean existsByUserAndCreatedAtAfter(User user, Instant createdAt);
+    boolean existsByIdAndUserAndSender(Long id, User user, Sender sender);
 }
