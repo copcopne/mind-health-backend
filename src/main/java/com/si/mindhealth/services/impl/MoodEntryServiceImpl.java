@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -34,11 +35,13 @@ import com.si.mindhealth.exceptions.ForbiddenException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.exceptions.NotFoundException;
 import com.si.mindhealth.repositories.MoodEntryRepository;
-import com.si.mindhealth.repositories.projections.DailyMoodIndexView;
+import com.si.mindhealth.repositories.projections.DailyMoodPointView;
 import com.si.mindhealth.services.FeedbackService;
 import com.si.mindhealth.services.MoodEntryService;
 import com.si.mindhealth.services.MoodResultService;
 import com.si.mindhealth.services.UserService;
+import com.si.mindhealth.services.nlp.CrisisDetector;
+import com.si.mindhealth.utils.NormalizeInput;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -68,8 +71,15 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         newEntry.setMoodLevel(request.getMoodLevel());
 
         MoodEntry entry = moodEntryRepository.save(newEntry);
-        moodResultService.CalculateResult(entry, user);
+        
+        // Kiểm tra nếu tiêu cực quá
+        String normed = NormalizeInput.normalizeForMatch(entry.getContent());
+        Boolean isCrisis = CrisisDetector.hasCrisisSignal(normed);
+
+        moodResultService.CalculateResult(entry, user, isCrisis);
+
         MoodEntryResponseDTO response = new MoodEntryResponseDTO(entry);
+        response.setIsCrisis(isCrisis);
 
         return response;
     }
@@ -245,9 +255,9 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         if (from == null && to == null) {
             to = LocalDate.now(zoneId);
             from = to.minusDays(29);
-        } else if (from == null) {
+        } else if (from == null && to != null) {
             from = to.minusDays(29);
-        } else if (to == null) {
+        } else if (to == null && from != null) {
             to = from.plusDays(29);
         }
 
@@ -255,19 +265,21 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         Instant toInstant = to.plusDays(1).atStartOfDay(zoneId).toInstant();
 
         // Lấy dữ liệu thống kê
-        List<DailyMoodIndexView> raw = moodEntryRepository.aggregateDailyMood(user, fromInstant, toInstant);
+        var points = moodEntryRepository.listDailyMoodPoints(user, fromInstant, toInstant);
 
-        // Map thành Map<LocalDate, Double>
-        Map<LocalDate, Double> byDay = raw.stream()
-                .collect(Collectors.toMap(DailyMoodIndexView::getDay, DailyMoodIndexView::getMoodIndex));
+        Map<LocalDate, List<Integer>> byDay = points.stream().collect(
+                Collectors.groupingBy(
+                        DailyMoodPointView::getDay,
+                        TreeMap::new,
+                        Collectors.mapping(
+                                DailyMoodPointView::getValue,
+                                Collectors.toList())));
 
-        // Fill ngày trống & map sang StatsResponseDTO
+        // Fill đủ mọi ngày trong range (ngày không có điểm -> mảng rỗng)
         List<StatsResponseDTO> result = new ArrayList<>();
         for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
-            Double val = byDay.getOrDefault(d, null);
-            result.add(new StatsResponseDTO(d, val));
+            result.add(new StatsResponseDTO(d, byDay.getOrDefault(d, List.of())));
         }
-
         return result;
     }
 

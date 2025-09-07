@@ -7,7 +7,6 @@ import com.si.mindhealth.dtos.request.RefreshRequestDTO;
 import com.si.mindhealth.dtos.response.CredenticalsResponseDTO;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.exceptions.AuthException;
-import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.services.AuthService;
 import com.si.mindhealth.services.UserService;
 import com.si.mindhealth.utils.JwtUtils;
@@ -20,21 +19,16 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
 
     @Override
-    public CredenticalsResponseDTO loginHandler(LoginRequestDTO request){
+    public CredenticalsResponseDTO loginHandler(LoginRequestDTO request) throws Exception {
         String username = request.getUsername();
         if (this.userService.authenticate(request)) {
-                try {
                     User u = userService.getUserByUsername(username);
                     String accessToken = JwtUtils.generateAccessToken(username, u.getRole());
                     String refreshToken = JwtUtils.generateRefreshToken(username);
                     
                     return new CredenticalsResponseDTO(accessToken, refreshToken, 15 * 60);
-                }
-                catch (Exception ex) {
-                    throw new AuthException();
-                }
         }
-        throw new MyBadRequestException("Tài khoản hoặc mật khẩu không đúng!");
+        throw new AuthException();
     }
 
     @Override

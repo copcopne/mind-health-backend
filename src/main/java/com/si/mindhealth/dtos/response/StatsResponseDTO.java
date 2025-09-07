@@ -1,21 +1,19 @@
 package com.si.mindhealth.dtos.response;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class StatsResponseDTO {
     
     private LocalDate day;
-
-    @JsonProperty(value = "mood_index")
-    private Double moodIndex;
-
-    public StatsResponseDTO(LocalDate day, Double moodIndex) {
-        this.day = day;
-        this.moodIndex = moodIndex;
-    }
+    
+    @JsonProperty("mood_values")
+    private List<Integer> moodValues;
 }

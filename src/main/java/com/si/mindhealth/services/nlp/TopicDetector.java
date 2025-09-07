@@ -43,30 +43,27 @@ public class TopicDetector {
             "khi", "cua", "cho", "lam", "vi");
 
     // 100k, 2.5k, 50 k
-private static final Pattern MONEY_K = Pattern.compile(
-    "\\b\\d+(?:[.,]\\d+)?\\s?k\\b",
-    Pattern.CASE_INSENSITIVE
-);
+    private static final Pattern MONEY_K = Pattern.compile(
+            "\\b\\d+(?:[.,]\\d+)?\\s?k\\b",
+            Pattern.CASE_INSENSITIVE);
 
-// Số + (ngan|nghin): 3 ngan, 10 nghin, 2.5 ngan...
-private static final Pattern MONEY_NGAN_NUMBER = Pattern.compile(
-    "\\b\\d+(?:[.,]\\d+)?\\s*(?:ngan|nghin)\\b",
-    Pattern.CASE_INSENSITIVE
-);
+    // Số + (ngan|nghin): 3 ngan, 10 nghin, 2.5 ngan...
+    private static final Pattern MONEY_NGAN_NUMBER = Pattern.compile(
+            "\\b\\d+(?:[.,]\\d+)?\\s*(?:ngan|nghin)\\b",
+            Pattern.CASE_INSENSITIVE);
 
-// (chuc|tram) + (ngan|nghin): chuc ngan, tram nghin, vai chuc ngan (vẫn match phần "chuc ngan")
-private static final Pattern MONEY_NGAN_WORD = Pattern.compile(
-    "\\b(?:chuc|tram)\\s+(?:ngan|nghin)\\b",
-    Pattern.CASE_INSENSITIVE
-);
+    // (chuc|tram) + (ngan|nghin): chuc ngan, tram nghin, vai chuc ngan (vẫn match
+    // phần "chuc ngan")
+    private static final Pattern MONEY_NGAN_WORD = Pattern.compile(
+            "\\b(?:chuc|tram)\\s+(?:ngan|nghin)\\b",
+            Pattern.CASE_INSENSITIVE);
 
-// 10.000 / 100,000 / 1.000.000 (ngưỡng nghìn trở lên có nhóm 3 số)
-private static final Pattern MONEY_THOUSANDS_GROUPED = Pattern.compile(
-    "\\b\\d{1,3}(?:[.,]\\d{3})+\\b"
-);
+    // 10.000 / 100,000 / 1.000.000 (ngưỡng nghìn trở lên có nhóm 3 số)
+    private static final Pattern MONEY_THOUSANDS_GROUPED = Pattern.compile(
+            "\\b\\d{1,3}(?:[.,]\\d{3})+\\b");
 
     @Transactional
-    public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog) {
+    public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog, Boolean isCrisis) {
         String rawNote = moodEntry.getContent();
         MoodLevel userMood = moodEntry.getMoodLevel();
         // 1) Chuẩn hoá
@@ -167,13 +164,13 @@ private static final Pattern MONEY_THOUSANDS_GROUPED = Pattern.compile(
 
             if (topic == SupportTopic.MONEY &&
                     (filteredPadded.contains(" li xi ")
-                    || filteredPadded.contains(" mung tuoi ")
-                    || (filteredPadded.contains(" thuong tet ") 
-                    || filteredPadded.contains(" tien thuong "))
-                    || MONEY_K.matcher(filteredPadded).find()
-                    || MONEY_NGAN_NUMBER.matcher(filteredPadded).find()
-                    || MONEY_NGAN_WORD.matcher(filteredPadded).find()
-                    || MONEY_THOUSANDS_GROUPED.matcher(filteredPadded).find())) {
+                            || filteredPadded.contains(" mung tuoi ")
+                            || (filteredPadded.contains(" thuong tet ")
+                                    || filteredPadded.contains(" tien thuong "))
+                            || MONEY_K.matcher(filteredPadded).find()
+                            || MONEY_NGAN_NUMBER.matcher(filteredPadded).find()
+                            || MONEY_NGAN_WORD.matcher(filteredPadded).find()
+                            || MONEY_THOUSANDS_GROUPED.matcher(filteredPadded).find())) {
                 score += 1;
             }
 
@@ -181,18 +178,19 @@ private static final Pattern MONEY_THOUSANDS_GROUPED = Pattern.compile(
         }
 
         // === CRISIS BOOST: ép MENTAL_HEALTH nếu có tín hiệu khủng hoảng ===
-        boolean crisis = CrisisDetector.hasCrisisSignal(text); // text đã được chuẩn hóa
-        if (crisis) {
+        if (isCrisis != null && isCrisis) {
             scores.merge(SupportTopic.MENTAL_HEALTH, 5, Integer::sum);
+        } else if (isCrisis == null) {
+            isCrisis = CrisisDetector.hasCrisisSignal(text);
         }
 
         // 7) Lọc những topic qua ngưỡng & sort
         // đổi chỗ build passed một chút
-List<TopicScore> passed = scores.entrySet().stream()
-        .filter(e -> e.getValue() >= MIN_SCORE_TO_ASSIGN)
-        .map(e -> new TopicScore(e.getKey(), e.getValue())) // topic = enum
-        .sorted((a, b) -> Integer.compare(b.score(), a.score()))
-        .toList();
+        List<TopicScore> passed = scores.entrySet().stream()
+                .filter(e -> e.getValue() >= MIN_SCORE_TO_ASSIGN)
+                .map(e -> new TopicScore(e.getKey(), e.getValue())) // topic = enum
+                .sorted((a, b) -> Integer.compare(b.score(), a.score()))
+                .toList();
 
         // 8) Giới hạn số topic lại
         List<TopicScore> hits = passed;
@@ -211,7 +209,7 @@ List<TopicScore> passed = scores.entrySet().stream()
 
         // 11) Mood blend (user + model) + crisis override
         MoodLevel model = MoodMapper.fromSentiment(r);
-        MoodDecider.Decision md = MoodDecider.decide(userMood, r, crisis);
+        MoodDecider.Decision md = MoodDecider.decide(userMood, r, isCrisis);
 
         // 12) build payload log
         if (saveLog == true) {
@@ -236,7 +234,7 @@ List<TopicScore> passed = scores.entrySet().stream()
             payload.put("primaryTopic", primaryTopic);
             payload.put("primaryScore", primaryScore);
             payload.put("negRatio", negRatio);
-            payload.put("crisis", crisis);
+            payload.put("crisis", isCrisis);
             payload.put("modelMood", model.name());
             payload.put("finalMood", md.finalMood.name());
             payload.put("disagreed", md.disagreed);
@@ -266,7 +264,7 @@ List<TopicScore> passed = scores.entrySet().stream()
                 primaryTopic, // có thể null nếu không có hit nào
                 primaryScore, // int: 0 nếu không có hit
                 negRatio, // sentimentScore: đang dùng negRatio [0..1]
-                crisis, // isCrisis
+                isCrisis, // isCrisis
                 model.name(), // modelMood (string)
                 md.finalMood.name(), // finalMood (string)
                 md.disagreed, // disagreed

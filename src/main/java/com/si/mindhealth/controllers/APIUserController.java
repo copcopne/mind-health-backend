@@ -1,9 +1,12 @@
 package com.si.mindhealth.controllers;
 
+import com.si.mindhealth.dtos.request.DeletionRequestDTO;
 import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
+import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.OTPType;
+import com.si.mindhealth.services.DeletionRequestService;
 import com.si.mindhealth.services.OTPService;
 import com.si.mindhealth.services.UserService;
 
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +31,7 @@ import java.security.Principal;
 public class APIUserController {
     private final UserService userService;
     private final OTPService otpService;
+    private final DeletionRequestService deletionRequestService;
 
     @PostMapping(path = "/users")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO request) {
@@ -49,5 +54,13 @@ public class APIUserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.getProfile(principal));
+    }
+
+    @DeleteMapping(path = "/users/profile")
+    public ResponseEntity<?> deleteProfile(@RequestBody DeletionRequestDTO request, Principal principal) {
+        User userToDelete = userService.getUserByUsername(principal.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(deletionRequestService.create(request, userToDelete));
     }
 }

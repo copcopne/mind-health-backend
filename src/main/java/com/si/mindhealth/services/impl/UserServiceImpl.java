@@ -5,9 +5,11 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
+import com.si.mindhealth.exceptions.AuthException;
 import com.si.mindhealth.exceptions.ForbiddenException;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.UserRepository;
+import com.si.mindhealth.services.DeletionRequestService;
 import com.si.mindhealth.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DeletionRequestService deletionRequestService;
 
     @Override
     @Transactional
@@ -45,7 +48,7 @@ public class UserServiceImpl implements UserService {
     public User getUserByUsername(String username) {
         Optional<User> u = userRepository.findByUsername(username);
         if (u.isEmpty())
-            throw new MyBadRequestException("Không tồn tại người dùng với username: " + username + "!");
+            return null;
 
         return u.get();
     }
@@ -53,6 +56,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getVerifiedUserByUsername(String username) {
         User user = this.getUserByUsername(username);
+
+        if (user == null)
+            throw new AuthException();
 
         if (user.getIsVerified() == false)
             throw new ForbiddenException("Tài khoản chưa được xác minh!");
@@ -91,9 +97,10 @@ public class UserServiceImpl implements UserService {
         u.setRole("ROLE_USER");
         u.setIsActive(true);
 
-        if(request.getAcceptSharingData() == null)
+        if (request.getAcceptSharingData() == null)
             u.setIsAcceptSharingData(true);
-        else u.setIsAcceptSharingData(request.getAcceptSharingData());
+        else
+            u.setIsAcceptSharingData(request.getAcceptSharingData());
 
         UserResponseDTO newUserDTO = new UserResponseDTO(this.userRepository.save(u));
 
@@ -103,6 +110,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getRoleByUsername(String username) {
         User user = this.getUserByUsername(username);
+
+        if (user == null)
+            throw new AuthException();
         return user.getRole();
     }
 
@@ -111,6 +121,10 @@ public class UserServiceImpl implements UserService {
         User user = this.getUserByUsername(request.getUsername());
         if (user == null)
             return false;
+
+        // Kiểm tra và khôi phục tình trạng tài khoản nếu chưa tới hạn xóa
+        deletionRequestService.check(user);
+
         return (passwordEncoder.matches(request.getPassword(), user.getPassword()));
     }
 
@@ -155,13 +169,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDTO getProfile(Principal principal) {
         User user = this.getUserByUsername(principal.getName());
+        if (user == null)
+            throw new AuthException();
         return new UserResponseDTO(user);
     }
 
     @Override
     @Transactional
     public UserResponseDTO verifyUser(User u) {
-        
+
         u.setIsVerified(true);
         User newUser = userRepository.save(u);
         UserResponseDTO response = new UserResponseDTO(newUser);

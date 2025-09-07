@@ -29,9 +29,9 @@ public class MoodResultServiceImpl implements MoodResultService {
     @Override
     @Async
     @Transactional
-    public void CalculateResult(MoodEntry entry, User user) {
+    public void CalculateResult(MoodEntry entry, User user,  Boolean isCrisis) {
         // Chạy NLP
-        TopicMultiResult results = topicDetector.detectMulti(entry, user.getIsAcceptSharingData());
+        TopicMultiResult results = topicDetector.detectMulti(entry, user.getIsAcceptSharingData(), isCrisis);
 
         // ===== UP SERT THEO @MapsId (id của MoodResult == entry.getId()) =====
         Long entryId = entry.getId();
@@ -71,6 +71,11 @@ public class MoodResultServiceImpl implements MoodResultService {
 
         // Lưu (UPDATE nếu đã tồn tại, INSERT nếu lần đầu)
         moodResultRepository.save(r);
+    }
+
+    @Override
+    public void CalculateResult(MoodEntry entry, User user) {
+        this.CalculateResult(entry, user, null);
     }
 
     @Override

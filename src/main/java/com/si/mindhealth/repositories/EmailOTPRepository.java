@@ -17,10 +17,12 @@ public interface EmailOTPRepository extends JpaRepository<EmailOTP, Long> {
     Optional<EmailOTP> findTopByUserAndTypeAndConsumedAtIsNullOrderByCreatedAtDesc(
             User user, OTPType type);
 
-    // Rate limit theo user
+    // Rate limit theo user 
     long countByUserAndCreatedAtAfter(User user, Instant after);
 
     @Modifying
     @Query("delete from EmailOTP o where o.user = :user and o.type = :type and o.consumedAt is null")
     int deleteAllActiveByUserAndType(@Param("user") User user, @Param("type") OTPType type);
+
+    void deleteByUser(User user);
 }

@@ -26,7 +26,7 @@ public class APIAuthController {
     private final OTPService otpService;
 
     @PostMapping(path = "/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request) throws Exception {
         return ResponseEntity
                 .ok()
                 .body(authService.loginHandler(request));

@@ -19,4 +19,5 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findTop4ByUserAndSenderOrderByCreatedAtDesc(User user, Sender sender);
     boolean existsByUserAndCreatedAtAfter(User user, Instant createdAt);
     boolean existsByIdAndUserAndSender(Long id, User user, Sender sender);
+    void deleteByUser(User user);
 }
