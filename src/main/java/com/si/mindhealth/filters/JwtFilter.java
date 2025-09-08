@@ -25,38 +25,38 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String[] PUBLIC_PATTERNS = new String[] {
             "/api/auth/**",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/login",
+            "/css/**",
+            "/js/**",
     };
 
-    private boolean isPublic(HttpServletRequest req) {
-        String path = req.getServletPath();
-        String method = req.getMethod();
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getServletPath();
+        String method = request.getMethod();
 
-        // Chỉ cho phép POST /api/users là public
         if ("POST".equalsIgnoreCase(method) && matcher.match("/api/users", path)) {
             return true;
         }
-        // Các pattern khác
         for (String p : PUBLIC_PATTERNS) {
-            if (matcher.match(p, path))
+            if (matcher.match(p, path)) {
                 return true;
+            }
         }
         return false;
     }
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return isPublic(request);
-    }
-
-    @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest req, @NonNull HttpServletResponse rsp,
-            @NonNull FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest req,
+            @NonNull HttpServletResponse rsp,
+            @NonNull FilterChain chain) throws ServletException, IOException {
 
         String header = req.getHeader("Authorization");
+
         if (header == null || !header.startsWith("Bearer ")) {
-            rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header.");
+            chain.doFilter(req, rsp);
             return;
         }
 
@@ -83,4 +83,5 @@ public class JwtFilter extends OncePerRequestFilter {
             rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token không hợp lệ hoặc hết hạn");
         }
     }
+
 }

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lỗi</title>
+    <th:block th:replace="~{base :: styles}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/error.css}" />
+    <style>
+        .error-card {
+            max-width: 480px;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .error-icon {
+            font-size: 4rem;
+        }
+    </style>
+</head>
+<body class="vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="error-card text-center bg-white">
+        <div class="mb-3">
+            <i class="error-icon text-danger fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h1 class="display-4 fw-bold" th:text="${status}">Error</h1>
+
+        <p class="text-muted mb-4" th:text="${message}">
+            Đã xảy ra lỗi không mong muốn!
+        </p>
+
+        <div class="d-flex justify-content-center gap-2">
+            <a th:href="@{/}" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>Về trang chủ
+            </a>
+            <a th:if="${status == 403}" th:href="@{/logout}" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+            </a>
+        </div>
+    </div>
+
+    <div th:replace="~{base :: mdb_script}"></div>
+</body>
+</html>

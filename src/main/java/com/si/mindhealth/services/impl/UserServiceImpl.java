@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
 
         if (user.getPassword() != null)
             if (!this.authenticate(new LoginRequestDTO(u.getUsername(), user.getOldPassword())))
-                throw new MyBadRequestException("Mật khẩu cũ không đúng!");
+                throw new AuthException("Mật khẩu cũ không đúng!");
             else
                 u.setPassword(this.passwordEncoder.encode(user.getPassword()));
 

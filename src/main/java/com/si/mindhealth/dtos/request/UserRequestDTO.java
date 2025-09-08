@@ -2,9 +2,9 @@ package com.si.mindhealth.dtos.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 public class UserRequestDTO {
 
     @JsonProperty("first_name")
@@ -19,6 +19,8 @@ public class UserRequestDTO {
     private String oldPassword;
 
     private String password;
+
+    private String confirm;
 
     @JsonProperty(value = "accept_sharing_data")
     private Boolean acceptSharingData;
