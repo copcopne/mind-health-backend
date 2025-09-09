@@ -1,23 +1,265 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 
 <head>
-    <title>Trang chủ</title>
+    <title>Quản lý người dùng</title>
     <th:block th:replace="~{base :: styles}"></th:block>
 </head>
 
 <body class="d-flex flex-column vh-100">
-    <div th:replace="base :: header"></div>
+    <div th:replace="~{base :: header}"></div>
 
     <main style="margin-top: 58px">
-        <div class="container pt-4">
-            <h2>users</h2>
-            <p>Xin chào, <span sec:authentication="name"></span>!</p>
+        <div class="container pt-4" th:object="${users}">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="mb-0">Quản lý người dùng</h2>
+                <div class="text-muted small">
+                    Tổng <span th:text="*{totalElements}">0</span> người dùng —
+                    Trang <span th:text="*{page + 1}">1</span>/<span th:text="*{totalPages}">1</span>
+                </div>
+            </div>
+
+            <form th:action="@{/users}" method="get" class="row g-2 align-items-center mb-3">
+
+                <!-- Trái: ô tìm kiếm + nút thêm dính nhau -->
+                <div class="col-12 col-lg-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="keyword"
+                            placeholder="Tìm theo username, email, họ tên..." th:value="${param.keyword}">
+
+                        <!-- Nút XÓA: chỉ hiện khi có keyword -->
+                        <button type="button" class="btn btn-outline-secondary" data-mdb-ripple-init
+                            th:if="${not #strings.isEmpty(param.keyword)}"
+                            onclick="const f=this.closest('form'); f.keyword.value=''; f.page.value=0; f.submit();">
+                            Xóa tìm kiếm
+                        </button>
+
+                        <button type="button" class="btn btn-primary" data-mdb-ripple-init data-mdb-modal-init
+                            data-mdb-target="#createUserModal">
+                            Thêm người dùng
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- Phải: chọn kích thước trang -->
+                <div class="col-12 col-lg-4">
+                    <div class="d-flex align-items-center justify-content-lg-end justify-content-start gap-2">
+                        <label class="mb-0 text-nowrap">Kích thước trang</label>
+                        <select class="form-select w-auto" name="size"
+                            onchange="this.form.page.value=0; this.form.submit()">
+                            <option th:value="5" th:selected="*{size} == 5">5</option>
+                            <option th:value="10" th:selected="*{size} == 10">10</option>
+                            <option th:value="20" th:selected="*{size} == 20">20</option>
+                            <option th:value="50" th:selected="*{size} == 50">50</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Khi tìm kiếm/đổi size thì reset về trang 0 -->
+                <input type="hidden" name="page" value="0" />
+            </form>
+
+
+
+            <!-- Bảng người dùng -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div th:if="${successMessage}" class="alert alert-success mb-3" th:text="${successMessage}">
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger mb-3" th:text="${errorMessage}">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Họ</th>
+                                    <th>Tên</th>
+                                    <th>Role</th>
+                                    <th>Giới tính</th>
+                                    <th class="text-end">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="u, stat : *{content}">
+                                    <td th:text="${users.page * users.size + stat.index + 1}">1</td>
+                                    <td th:text="${u.username}">username</td>
+                                    <td th:text="${u.email}">email@example.com</td>
+                                    <td th:text="${u.lastName}">Nguyễn</td>
+                                    <td th:text="${u.firstName}">An</td>
+                                    <td><span class="badge bg-secondary" th:text="${u.role}">USER</span></td>
+                                    <td th:text="${u.gender} ? 'Nam' : 'Nữ'">Nam</td>
+                                    <td class="text-end">
+                                        <!-- Ví dụ nút xem/sửa/xóa (wire sau) -->
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                            th:href="@{'/users/' + ${u.id} + '/edit'}">Sửa</a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-mdb-modal-init
+                                            data-mdb-target="#deleteModal"
+                                            th:attr="data-id=${u.id}, data-username=${u.username}">
+                                            Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:if="*{content} == null or *{content.isEmpty()}">
+                                    <td colspan="11" class="text-center text-muted py-4">Không có dữ liệu.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phân trang -->
+            <nav aria-label="Pagination" class="mt-3" th:if="*{totalPages > 0}">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="!*{hasPrevious} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/users(page=*{page - 1}, size=*{size}, keyword=${param.keyword})}">Prev</a>
+                    </li>
+
+                    <!-- Hiển thị một ít số trang; đơn giản: current-2 .. current+2 -->
+                    <li class="page-item"
+                        th:each="p : ${#numbers.sequence(T(java.lang.Math).max(0, users.page - 2), T(java.lang.Math).min(users.totalPages - 1, users.page + 2))}"
+                        th:classappend="${p} == *{page} ? 'active'">
+                        <a class="page-link" th:text="${p + 1}"
+                            th:href="@{/users(page=${p}, size=*{size}, keyword=${param.keyword})}">1</a>
+
+                    </li>
+
+                    <li class="page-item" th:classappend="!*{hasNext} ? 'disabled'">
+                        <a class="page-link"
+                            th:href="@{/users(page=*{page + 1}, size=*{size}, keyword=${param.keyword})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Modal tạo user -->
+        <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form id="createUserForm" th:action="@{/users}" method="post" th:object="${newUser}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createUserModalLabel">Tạo người dùng mới</h5>
+                            <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div id="createUserError" class="alert alert-danger d-none"></div>
+                            <div id="createUserSuccess" class="alert alert-success d-none"></div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Username</label>
+                                    <input class="form-control" maxlength="50" required th:field="*{username}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" maxlength="100" required
+                                        th:field="*{email}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control" minlength="6" required
+                                        th:field="*{password}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Vai trò</label>
+
+                                    <select class="form-select" required th:field="*{role}">
+                                        <option value="ROLE_USER">USER</option>
+                                        <option value="ROLE_ADMIN">ADMIN</option>
+                                    </select>
+
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ (lastName)</label>
+                                    <input class="form-control" maxlength="50" required th:field="*{lastName}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên (firstName)</label>
+                                    <input class="form-control" maxlength="30" required th:field="*{firstName}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Giới tính</label>
+                                    <select class="form-select" required th:field="*{gender}">
+                                        <option th:value="true">Nam</option>
+                                        <option th:value="false">Nữ</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-mdb-ripple-init
+                                data-mdb-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary">
+                                Tạo mới
+                                <span id="createUserLoading"
+                                    class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal cảnh báo xóa -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="deleteUserForm" method="post">
+                        <input type="hidden" name="_method" value="delete">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteLabel">Xóa người dùng</h5>
+                            <button type="button" class="btn-close" data-mdb-ripple-init data-mdb-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <span id="deleteConfirmText">Bạn có chắc muốn xóa người dùng này không? Dữ liệu liên quan
+                                cũng sẽ bị xóa theo.</span>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-mdb-ripple-init
+                                data-mdb-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-danger">
+                                Xóa
+                                <span class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </main>
 
     <div th:replace="~{base :: mdb_script}"></div>
     <div th:replace="~{base :: main_scripts}"></div>
+    <script>
+        (function () {
+            const modalEl = document.getElementById('deleteModal');
+            const form = document.getElementById('deleteUserForm');
+            const textEl = document.getElementById('deleteConfirmText');
+
+            // MDB event
+            modalEl.addEventListener('show.mdb.modal', function (e) {
+                const btn = e.relatedTarget;
+                const id = btn.getAttribute('data-id');
+                const un = btn.getAttribute('data-username') || '';
+
+                form.action = `/MindHealth/users/${id}/delete`;
+
+                if (un) textEl.textContent = `Bạn có chắc muốn xóa "${un}" không? Dữ liệu liên quan cũng sẽ bị xóa theo.`;
+            });
+        })();
+    </script>
 
 </body>
 

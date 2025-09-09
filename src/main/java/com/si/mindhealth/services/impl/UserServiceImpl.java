@@ -3,6 +3,7 @@ package com.si.mindhealth.services.impl;
 import com.si.mindhealth.dtos.request.LoginRequestDTO;
 import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
+import com.si.mindhealth.dtos.response.PageResponseDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.exceptions.AuthException;
@@ -14,6 +15,11 @@ import com.si.mindhealth.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -101,6 +108,37 @@ public class UserServiceImpl implements UserService {
             u.setIsAcceptSharingData(true);
         else
             u.setIsAcceptSharingData(request.getAcceptSharingData());
+
+        UserResponseDTO newUserDTO = new UserResponseDTO(this.userRepository.save(u));
+
+        return newUserDTO;
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO addUser(User request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new MyBadRequestException("Email đã tồn tại!");
+        }
+        Optional<User> user = userRepository.findByUsername(request.getUsername());
+        if (user.isPresent()) {
+            throw new MyBadRequestException("Tên người dùng đã tồn tại!");
+        }
+        User u = new User();
+        u.setFirstName(request.getFirstName());
+        u.setLastName(request.getLastName());
+        u.setEmail(request.getEmail());
+        u.setUsername(request.getUsername());
+        u.setGender(Boolean.valueOf(request.getGender()));
+        u.setPassword(this.passwordEncoder.encode(request.getPassword()));
+        u.setRole(request.getRole());
+        u.setIsActive(true);
+        u.setIsVerified(true);
+
+        if (request.getIsAcceptSharingData() == null)
+            u.setIsAcceptSharingData(true);
+        else
+            u.setIsAcceptSharingData(request.getIsAcceptSharingData());
 
         UserResponseDTO newUserDTO = new UserResponseDTO(this.userRepository.save(u));
 
@@ -191,5 +229,51 @@ public class UserServiceImpl implements UserService {
 
         u.setPassword(passwordEncoder.encode(rawNewPassword));
         userRepository.save(u);
+    }
+
+    @Override
+    public PageResponseDTO<User> getList(Map<String, String> params) {
+
+        int page = NumberUtils.toInt(params.get("page"), 0);
+        int size = NumberUtils.toInt(params.get("size"), 10);
+        size = Math.min(Math.max(size, 1), 100);
+
+        String sortBy = params.getOrDefault("sort", "createdAt");
+        String order = params.getOrDefault("order", "DESC");
+        Sort.Direction dir = "ASC".equalsIgnoreCase(order) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sortBy));
+        String kw = params.getOrDefault("keyword", "");
+
+        Page<User> pageData = userRepository.search(kw, pageable);
+
+        return new PageResponseDTO<>(pageData);
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        Optional<User> optional = userRepository.findById(id);
+        if (optional.isEmpty())
+            throw new MyBadRequestException("Không tìm thấy người dùng với id: " + id);
+        return optional.get();
+    }
+
+    @Override
+    public void updateUser(User user) {
+        User userTosaved = this.getUserById(user.getId());
+
+        userTosaved.setFirstName(user.getFirstName());
+        userTosaved.setLastName(user.getLastName());
+        userTosaved.setGender(user.getGender());
+        userTosaved.setIsVerified(user.getIsVerified());
+        userTosaved.setIsActive(user.getIsActive());
+        userTosaved.setRole(user.getRole());
+
+        userRepository.save(userTosaved);
+    }
+
+    @Override
+    public void deleteUserById(Long id) {
+        User userToDelete = this.getUserById(id);
+        userRepository.delete(userToDelete);
     }
 }
