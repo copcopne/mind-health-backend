@@ -6,6 +6,10 @@ import com.si.mindhealth.entities.User;
 
 public interface MoodResultService {
     MoodResult getResult(MoodEntry entry);
+
+    MoodResult get(Long id);
+
     void CalculateResult(MoodEntry entry, User user);
+
     void CalculateResult(MoodEntry entry, User user, Boolean isCrisis);
 }

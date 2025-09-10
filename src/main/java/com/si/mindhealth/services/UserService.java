@@ -35,7 +35,7 @@ public interface UserService extends UserDetailsService {
 
     void updateUser(User user);
 
-    void deleteUserById(Long id);
+    void deleteUserById(Long id, Principal principal);
 
     UserResponseDTO addUser(RegisterRequestDTO request);
     

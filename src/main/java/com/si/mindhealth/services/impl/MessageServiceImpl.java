@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.Sender;
 import com.si.mindhealth.entities.enums.TargetType;
 import com.si.mindhealth.exceptions.ForbiddenException;
+import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.MessageRepository;
 import com.si.mindhealth.services.FeedbackService;
 import com.si.mindhealth.services.GeminiService;
@@ -156,6 +158,14 @@ public class MessageServiceImpl implements MessageService {
         }
 
         return this.feedbackService.create(TargetType.MESSAGE, id, request, principal);
+    }
+
+    @Override
+    public Message get(Long id) {
+        Optional<Message> o = messageRepository.findById(id);
+        if (o.isEmpty())
+            throw new MyBadRequestException("Không tìm thấy tin nhắn với ID: " +  id);
+        return o.get();
     }
 
 }

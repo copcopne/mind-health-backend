@@ -272,8 +272,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(Long id) {
+    public void deleteUserById(Long id, Principal principal) {
         User userToDelete = this.getUserById(id);
+        if (userToDelete.getUsername() == principal.getName())
+            throw new MyBadRequestException("Bạn không thể xóa tài khoản của chính mình!");
         userRepository.delete(userToDelete);
     }
 }

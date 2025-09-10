@@ -13,6 +13,7 @@ import com.si.mindhealth.entities.MoodResultTopic;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.entities.enums.SupportTopic;
 import com.si.mindhealth.entities.enums.TopicType;
+import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.MoodResultRepository;
 import com.si.mindhealth.services.MoodResultService;
 import com.si.mindhealth.services.nlp.TopicDetector;
@@ -82,5 +83,13 @@ public class MoodResultServiceImpl implements MoodResultService {
     public MoodResult getResult(MoodEntry entry) {
         Optional<MoodResult> result = moodResultRepository.findByMoodEntry(entry);
         return result.orElse(null);
+    }
+
+    @Override
+    public MoodResult get(Long id) {
+        Optional<MoodResult> o = moodResultRepository.findById(id);
+        if (o.isEmpty())
+            throw new MyBadRequestException("Không tìm thấy kết quả nhật ký với ID: " +  id);
+        return o.get();
     }
 }

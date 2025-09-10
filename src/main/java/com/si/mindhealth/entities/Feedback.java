@@ -28,8 +28,16 @@ public class Feedback extends BaseEntity {
     @Column(length = 200)
     private String content;
 
+    @Column(nullable = false, name = "is_read")
+    private boolean isRead;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @PrePersist
+    protected void setIsRead() {
+        this.isRead = false;
+    }
 
 }

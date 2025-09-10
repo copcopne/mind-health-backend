@@ -65,10 +65,10 @@ public class UserController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, Model model,
+    public String delete(@PathVariable Long id, Model model, Principal principal,
             RedirectAttributes ra) {
         try {
-            userService.deleteUserById(id);
+            userService.deleteUserById(id, principal);
             ra.addFlashAttribute("successMessage", "Xóa người dùng thành công!");
             return "redirect:/users";
         } catch (Exception ex) {

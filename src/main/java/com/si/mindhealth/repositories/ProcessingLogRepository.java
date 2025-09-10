@@ -1,12 +1,13 @@
 package com.si.mindhealth.repositories;
 
-import java.lang.classfile.TypeAnnotation.TargetType;
-import java.util.Set;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.si.mindhealth.entities.ProcessingLog;
+import com.si.mindhealth.entities.enums.TargetType;
 
 public interface ProcessingLogRepository extends JpaRepository<ProcessingLog, Long> {
-    Set<ProcessingLog> findByTargetTypeAndTargetId(TargetType type, Long targetId);
+    Optional<ProcessingLog> findTopByTargetTypeAndTargetIdOrderByCreatedAtDescIdDesc(
+            TargetType targetType, Long targetId);
 }

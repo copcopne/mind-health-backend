@@ -6,5 +6,6 @@ import com.si.mindhealth.dtos.response.CredenticalsResponseDTO;
 
 public interface AuthService {
     CredenticalsResponseDTO loginHandler(LoginRequestDTO request) throws Exception;
+
     CredenticalsResponseDTO refreshHandler(RefreshRequestDTO request);
 }
