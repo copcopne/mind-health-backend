@@ -5,6 +5,7 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.PageResponseDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
+import com.si.mindhealth.dtos.response.UserStatsResponseDTO;
 import com.si.mindhealth.entities.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -46,4 +47,6 @@ public interface UserService extends UserDetailsService {
     UserResponseDTO verifyUser(User user);
 
     void resetPassword(User user, String rawNewPassword);
+
+    UserStatsResponseDTO aggregateByTime(Map<String, String> params);
 }

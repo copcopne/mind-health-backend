@@ -5,6 +5,7 @@ import com.si.mindhealth.dtos.request.RegisterRequestDTO;
 import com.si.mindhealth.dtos.request.UserRequestDTO;
 import com.si.mindhealth.dtos.response.PageResponseDTO;
 import com.si.mindhealth.dtos.response.UserResponseDTO;
+import com.si.mindhealth.dtos.response.UserStatsResponseDTO;
 import com.si.mindhealth.entities.User;
 import com.si.mindhealth.exceptions.AuthException;
 import com.si.mindhealth.exceptions.ForbiddenException;
@@ -28,6 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.Instant;
+import java.time.Year;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -278,4 +282,27 @@ public class UserServiceImpl implements UserService {
             throw new MyBadRequestException("Bạn không thể xóa tài khoản của chính mình!");
         userRepository.delete(userToDelete);
     }
+
+    @Override
+    public UserStatsResponseDTO aggregateByTime(Map<String, String> params) {
+        String timeType = params.getOrDefault("timeType", "YEAR");
+
+        int currentYear = Year.now(ZoneId.of("Asia/Ho_Chi_Minh")).getValue();
+
+        int year = params.containsKey("year")
+                ? Integer.parseInt(params.get("year"))
+                : currentYear;
+
+        int timeValue;
+        if ("YEAR".equalsIgnoreCase(timeType)) {
+            timeValue = year;
+        } else {
+            timeValue = params.containsKey("timeValue")
+                    ? Integer.parseInt(params.get("timeValue"))
+                    : currentYear;
+        }
+
+        return userRepository.aggregateByTime(timeType, timeValue, year);
+    }
+
 }

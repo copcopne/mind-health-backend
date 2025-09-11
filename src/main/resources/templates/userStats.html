@@ -4,6 +4,7 @@
 <head>
     <title>Trang chủ</title>
     <th:block th:replace="~{base :: styles}"></th:block>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="d-flex flex-column vh-100">
@@ -11,13 +12,215 @@
 
     <main style="margin-top: 58px">
         <div class="container pt-4">
-            <h2>stats</h2>
-            <p>Xin chào, <span sec:authentication="name"></span>!</p>
+            <h2 class="mb-3">Thống kê người dùng</h2>
+
+            <form method="get" th:action="@{/users/stats}" class="row g-3 mb-4" th:with="
+                now=${#dates.createNow()},
+                defaultYear=${#dates.year(now)},
+                curYear=${!#lists.isEmpty(param.year) ? param.year[0] : defaultYear},
+                curType=${!#lists.isEmpty(param.timeType) ? param.timeType[0] : 'YEAR'},
+                curValue=${!#lists.isEmpty(param.timeValue) ? param.timeValue[0] : curYear}
+            ">
+
+                <div class="col-md-3">
+                    <label for="year" class="form-label">Năm</label>
+                    <input type="number" class="form-control" id="year" name="year" th:value="${curYear}">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="timeType" class="form-label">Loại thời gian</label>
+                    <select class="form-select" id="timeType" name="timeType">
+                        <option value="YEAR" th:selected="${curType == 'YEAR'}">Năm</option>
+                        <option value="QUARTER" th:selected="${curType == 'QUARTER'}">Quý</option>
+                        <option value="MONTH" th:selected="${curType == 'MONTH'}">Tháng</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="timeValue" class="form-label">Giá trị</label>
+                    <select class="form-select" id="timeValue" name="timeValue"></select>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 my-1">Xem thống kê</button>
+                </div>
+
+                <input type="hidden" id="curType" th:value="${curType}">
+                <input type="hidden" id="curValue" th:value="${curValue}">
+                <input type="hidden" id="curYear" th:value="${curYear}">
+            </form>
+
+            <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Tóm tắt</h5>
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 40%">Nhãn</th>
+                                            <td>
+                                                <span id="labelData">YEAR2025</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Số lượng người dùng mới</th>
+                                            <td><span th:text="${data.count}">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tổng người dùng</th>
+                                            <td><span th:text="${data.total}">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tỷ lệ</th>
+                                            <td>
+                                                <span id="percentText">0%</span>
+                                                <div class="progress mt-2" style="height: 8px;">
+                                                    <div id="percentBar" class="progress-bar" role="progressbar"
+                                                        style="width: 0%;" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr>
+                            <div class="small text-muted">
+                                Bộ lọc hiện tại:
+                                <span class="badge bg-primary me-2" id="badgeType">YEAR</span>
+                                <span class="badge bg-secondary" id="badgeValue">2025</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Biểu đồ tròn</h5>
+                            <div class="ratio ratio-1x1">
+                                <canvas id="userStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
-
     <div th:replace="~{base :: mdb_script}"></div>
     <div th:replace="~{base :: main_scripts}"></div>
+
+
+    <script>
+        function renderTimeValueOptions(type, currentValue, year) {
+            const tv = document.getElementById('timeValue');
+            tv.innerHTML = '';
+
+            if (type === 'YEAR') {
+                const opt = document.createElement('option');
+                opt.value = String(year);
+                opt.textContent = 'Năm ' + year;
+                tv.appendChild(opt);
+                tv.value = String(year);
+                tv.disabled = true;
+                tv.classList.add('disabled');
+            } else if (type === 'QUARTER') {
+                tv.disabled = false;
+                ['1', '2', '3', '4'].forEach(q => {
+                    const opt = document.createElement('option');
+                    opt.value = q;
+                    opt.textContent = 'Quý ' + q;
+                    tv.appendChild(opt);
+                });
+                tv.value = String(currentValue || '1');
+            } else { // MONTH
+                tv.disabled = false;
+                for (let m = 1; m <= 12; m++) {
+                    const opt = document.createElement('option');
+                    opt.value = String(m);
+                    opt.textContent = 'Tháng ' + m;
+                    tv.appendChild(opt);
+                }
+                tv.value = String(currentValue || '1');
+            }
+        }
+
+        const curType = document.getElementById('curType').value || 'YEAR';
+        const curValue = document.getElementById('curValue').value || '';
+        const curYear = document.getElementById('curYear').value || new Date().getFullYear();
+        renderTimeValueOptions(curType, curValue, curYear);
+
+        document.getElementById('timeType').addEventListener('change', function () {
+            const type = this.value;
+            const year = document.getElementById('year').value || new Date().getFullYear();
+            renderTimeValueOptions(type, null, year);
+        });
+
+        function updateBadges() {
+            const type = document.getElementById('timeType').value;
+            const year = document.getElementById('year').value;
+            const val = document.getElementById('timeValue').value;
+
+            document.getElementById('badgeType').textContent = type;
+            document.getElementById('badgeValue').textContent =
+                type === 'YEAR' ? year : (type === 'QUARTER' ? ('Q' + val) : ('M' + val));
+        }
+        updateBadges();
+        document.getElementById('timeType').addEventListener('change', updateBadges);
+        document.getElementById('year').addEventListener('input', updateBadges);
+        document.getElementById('timeValue').addEventListener('change', updateBadges);
+    </script>
+
+    <script th:inline="javascript">
+        let total = [[${ data.total }]];
+        let count = [[${ data.count }]];
+        let label = [[${ data.label }]];
+
+        total = Number(total) || 0;
+        count = Number(count) || 0;
+
+        const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+        document.getElementById('percentText').textContent = percent + '%';
+        const bar = document.getElementById('percentBar');
+        bar.style.width = percent + '%';
+        bar.setAttribute('aria-valuenow', String(percent));
+
+        const ctx = document.getElementById('userStatsChart').getContext('2d');
+
+        let friendlyLabel = label;
+        if (curType === 'YEAR') {
+            friendlyLabel = 'Năm ' + curYear;
+        } else if (curType === 'QUARTER') {
+            friendlyLabel = 'Quý ' + curValue + ' năm ' + curYear;
+        } else if (curType === 'MONTH') {
+            friendlyLabel = 'Tháng ' + curValue + ' năm ' + curYear;
+        }
+        const item = document.getElementById("labelData");
+        if (item) {
+            item.textContent = friendlyLabel;
+        }
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [friendlyLabel, 'Còn lại'],
+                datasets: [{
+                    data: [count, Math.max(total - count, 0)],
+                    backgroundColor: ['#36A2EB', '#FF6384'],
+                }]
+            },
+            options: {
+                maintainAspectRatio: true,
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: { display: true, text: 'Thống kê người dùng' }
+                }
+            }
+        });
+    </script>
 
 </body>
 
