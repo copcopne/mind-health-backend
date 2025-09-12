@@ -1,8 +1,8 @@
 package com.si.mindhealth.dtos;
 
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 
 public record TopicScore(
-    SupportTopic topic,
+    Topic topic,
     int score
 ) {}

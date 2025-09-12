@@ -1,6 +1,6 @@
 package com.si.mindhealth.entities;
 
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 import com.si.mindhealth.entities.enums.TopicType;
 
 import jakarta.persistence.Column;
@@ -22,7 +22,7 @@ public class MoodResultTopic extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SupportTopic topic;
+    private Topic topic;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

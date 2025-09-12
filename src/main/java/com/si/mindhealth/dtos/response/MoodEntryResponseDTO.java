@@ -10,7 +10,7 @@ import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.MoodResultTopic;
 import com.si.mindhealth.entities.enums.MoodLevel;
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 import com.si.mindhealth.entities.enums.TopicType;
 
 import lombok.Data;
@@ -27,10 +27,10 @@ public class MoodEntryResponseDTO {
     private MoodLevel moodLevel;
 
     @JsonProperty(value = "main_topic")
-    private SupportTopic mainTopic;
+    private Topic mainTopic;
     
     @JsonProperty(value = "other_topics")
-    private Set<SupportTopic> otherTopics;
+    private Set<Topic> otherTopics;
 
     @JsonProperty(value = "sentiment_score")
     private double sentimentScore;

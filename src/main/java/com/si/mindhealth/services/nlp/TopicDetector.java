@@ -12,7 +12,7 @@ import com.si.mindhealth.dtos.TopicScore;
 import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.ProcessingLog;
 import com.si.mindhealth.entities.enums.MoodLevel;
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 import com.si.mindhealth.entities.enums.TargetType;
 import com.si.mindhealth.repositories.ProcessingLogRepository;
 import com.si.mindhealth.services.TopicKeywordStore;
@@ -92,10 +92,10 @@ public class TopicDetector {
         String filteredPadded = " " + filtered + " ";
 
         // 6) Tính điểm cho TẤT CẢ topic
-        Map<SupportTopic, Integer> scores = new EnumMap<>(SupportTopic.class);
+        Map<Topic, Integer> scores = new EnumMap<>(Topic.class);
 
         for (var entry : store.all().entrySet()) {
-            SupportTopic topic = entry.getKey();
+            Topic topic = entry.getKey();
             int score = 0;
 
             // Lọc các keywords lặp trong json
@@ -140,29 +140,29 @@ public class TopicDetector {
             }
 
             // tie-break rules
-            if (topic == SupportTopic.WORK &&
+            if (topic == Topic.WORK &&
                     (filteredPadded.contains(" sep ") || filteredPadded.contains(" kpi ")
                             || filteredPadded.contains(" hop ") || filteredPadded.contains(" ot "))) {
                 score += 1;
             }
-            if (topic == SupportTopic.FAMILY &&
+            if (topic == Topic.FAMILY &&
                     (filteredPadded.contains(" gia dinh ") || filteredPadded.contains(" ap luc gia dinh "))) {
                 score += 1;
             }
-            if (topic == SupportTopic.WORK &&
+            if (topic == Topic.WORK &&
                     (filteredPadded.contains(" cong viec ") || tokenSet.contains("deadline"))) {
                 score += 1;
             }
-            if (topic == SupportTopic.MENTAL_HEALTH &&
+            if (topic == Topic.MENTAL_HEALTH &&
                     (filteredPadded.contains(" ap luc ") || filteredPadded.contains(" lo au ")
                             || filteredPadded.contains(" kiet suc "))) {
                 score += 1;
             }
-            if (topic == SupportTopic.LONELINESS && filteredPadded.contains(" co don ")) {
+            if (topic == Topic.LONELINESS && filteredPadded.contains(" co don ")) {
                 score += 1;
             }
 
-            if (topic == SupportTopic.MONEY &&
+            if (topic == Topic.MONEY &&
                     (filteredPadded.contains(" li xi ")
                             || filteredPadded.contains(" mung tuoi ")
                             || (filteredPadded.contains(" thuong tet ")
@@ -179,7 +179,7 @@ public class TopicDetector {
 
         // === CRISIS BOOST: ép MENTAL_HEALTH nếu có tín hiệu khủng hoảng ===
         if (isCrisis != null && isCrisis) {
-            scores.merge(SupportTopic.MENTAL_HEALTH, 5, Integer::sum);
+            scores.merge(Topic.MENTAL_HEALTH, 5, Integer::sum);
         } else if (isCrisis == null) {
             isCrisis = CrisisDetector.hasCrisisSignal(text);
         }
@@ -199,7 +199,7 @@ public class TopicDetector {
         }
 
         // 9) Chia topic chính và phụ
-        String primaryTopic = hits.isEmpty() ? SupportTopic.GENERAL.getLabel() : hits.get(0).topic().getLabel();
+        String primaryTopic = hits.isEmpty() ? Topic.GENERAL.getLabel() : hits.get(0).topic().getLabel();
         List<TopicScore> otherTopics = hits.stream().skip(1).toList();
         int primaryScore = hits.isEmpty() ? 0 : hits.get(0).score();
 

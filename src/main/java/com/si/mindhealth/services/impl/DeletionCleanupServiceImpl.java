@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.si.mindhealth.entities.DeletionRequest;
 import com.si.mindhealth.entities.User;
-import com.si.mindhealth.entities.enums.DeletionStatus;
 import com.si.mindhealth.repositories.*;
 import com.si.mindhealth.services.DeletionCleanupService;
 
@@ -33,7 +32,7 @@ public class DeletionCleanupServiceImpl implements DeletionCleanupService {
     @Transactional
     public int processApprovedRequests() {
         List<DeletionRequest> requests = deletionRequestRepository
-                .findByStatusAndProcessedAtIsNull(DeletionStatus.APPROVED);
+                .findByProcessedAtIsNull();
 
         int done = 0;
         for (DeletionRequest req : requests) {
@@ -69,7 +68,7 @@ public class DeletionCleanupServiceImpl implements DeletionCleanupService {
     }
 
     private void anonymizeUser(User user) {
-        // đổi các trường PII
+        
         String suffix = "deleted-" + user.getId() + "-" + UUID.randomUUID().toString().substring(0, 8);
         String fakeEmail = suffix + "@example.invalid";
         String fakeUsername = suffix;

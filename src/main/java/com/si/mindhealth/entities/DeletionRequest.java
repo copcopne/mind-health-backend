@@ -2,12 +2,8 @@ package com.si.mindhealth.entities;
 
 import java.time.Instant;
 
-import com.si.mindhealth.entities.enums.DeletionStatus;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -27,10 +23,6 @@ public class DeletionRequest extends BaseEntity {
 
     @Column(nullable = false, length = 500)
     private String reason;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private DeletionStatus status = DeletionStatus.PENDING;
 
     @Column(name = "processed_at")
     private Instant processedAt;

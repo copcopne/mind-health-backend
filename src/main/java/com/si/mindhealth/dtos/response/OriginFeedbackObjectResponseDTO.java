@@ -10,7 +10,7 @@ import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.MoodResultTopic;
 import com.si.mindhealth.entities.ProcessingLog;
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 import com.si.mindhealth.entities.enums.TargetType;
 import com.si.mindhealth.entities.enums.TopicType;
 
@@ -58,8 +58,8 @@ public class OriginFeedbackObjectResponseDTO {
                             .append(Boolean.TRUE.equals(r.getIsCrisis()) ? "Có" : "Không").append('\n'); // isCrisis,
                                                                                                          // sentimentScore
 
-                    Set<SupportTopic> others = Collections.emptySet();
-                    SupportTopic main = null;
+                    Set<Topic> others = Collections.emptySet();
+                    Topic main = null;
                     if (r.getTopics() != null) {
                         main = r.getTopics().stream()
                                 .filter(t -> t.getType() == TopicType.MAIN_TOPIC)
@@ -76,7 +76,7 @@ public class OriginFeedbackObjectResponseDTO {
                     }
                     if (!others.isEmpty()) {
                         sb.append("Chủ đề phụ: ")
-                                .append(others.stream().map(SupportTopic::getLabel).collect(Collectors.joining(", ")))
+                                .append(others.stream().map(Topic::getLabel).collect(Collectors.joining(", ")))
                                 .append('\n');
                     }
                 }

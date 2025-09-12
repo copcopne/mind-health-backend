@@ -11,7 +11,7 @@ import com.si.mindhealth.entities.MoodEntry;
 import com.si.mindhealth.entities.MoodResult;
 import com.si.mindhealth.entities.MoodResultTopic;
 import com.si.mindhealth.entities.User;
-import com.si.mindhealth.entities.enums.SupportTopic;
+import com.si.mindhealth.entities.enums.Topic;
 import com.si.mindhealth.entities.enums.TopicType;
 import com.si.mindhealth.exceptions.MyBadRequestException;
 import com.si.mindhealth.repositories.MoodResultRepository;
@@ -56,7 +56,7 @@ public class MoodResultServiceImpl implements MoodResultService {
 
         // Topic chính
         MoodResultTopic main = new MoodResultTopic();
-        main.setTopic(SupportTopic.fromString(results.primaryTopic()));
+        main.setTopic(Topic.fromString(results.primaryTopic()));
         main.setType(TopicType.MAIN_TOPIC);
         main.setMoodResult(r);
         r.getTopics().add(main);

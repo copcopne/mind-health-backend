@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum SupportTopic {
+public enum Topic {
 
     GENERAL("Chung"),
 
@@ -29,7 +29,7 @@ public enum SupportTopic {
 
     private final String label;
 
-    SupportTopic(String label) {
+    Topic(String label) {
         this.label = label;
     }
 
@@ -38,10 +38,10 @@ public enum SupportTopic {
         return label;
     }
 
-    private static final Map<String, SupportTopic> LOOKUP = new HashMap<>();
+    private static final Map<String, Topic> LOOKUP = new HashMap<>();
 
     static {
-        for (SupportTopic t : values()) {
+        for (Topic t : values()) {
             // enum name (upper-case)
             LOOKUP.put(t.name().toUpperCase(), t);
             // nhãn vi (exact)
@@ -49,10 +49,10 @@ public enum SupportTopic {
         }
     }
 
-    public static SupportTopic fromString(String s) {
+    public static Topic fromString(String s) {
         if (s == null)
             return GENERAL;
-        SupportTopic t = LOOKUP.get(s.toUpperCase());
+        Topic t = LOOKUP.get(s.toUpperCase());
         if (t == null) {
             t = LOOKUP.get(s);
         }
