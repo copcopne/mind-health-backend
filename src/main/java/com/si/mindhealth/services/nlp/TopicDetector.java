@@ -63,11 +63,16 @@ public class TopicDetector {
             "\\b\\d{1,3}(?:[.,]\\d{3})+\\b");
 
     @Transactional
-    public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog, Boolean isCrisis) {
+    public TopicMultiResult detectMulti(MoodEntry moodEntry, Boolean saveLog, Boolean isCrisis, String normed) {
         String rawNote = moodEntry.getContent();
         MoodLevel userMood = moodEntry.getMoodLevel();
+        
         // 1) Chuẩn hoá
-        String text = NormalizeInput.normalizeForMatch(rawNote);
+        String text = null;
+        if (normed == null)
+            text = NormalizeInput.normalizeForMatch(rawNote);
+        else
+            text = normed;
 
         // 2) KHÔNG lọc stopwords -> cho phrase
         List<String> tokensAll = Arrays.stream(text.split("\\s+"))

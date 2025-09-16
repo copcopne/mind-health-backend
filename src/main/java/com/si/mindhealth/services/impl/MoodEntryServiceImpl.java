@@ -71,7 +71,7 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         newEntry.setMoodLevel(request.getMoodLevel());
 
         MoodEntry entry = moodEntryRepository.save(newEntry);
-        
+
         // Kiểm tra nếu tiêu cực quá
         String normed = NormalizeInput.normalizeForMatch(entry.getContent());
         Boolean isCrisis = CrisisDetector.hasCrisisSignal(normed);
@@ -192,8 +192,14 @@ public class MoodEntryServiceImpl implements MoodEntryService {
         boolean isEditable = true;
         User user = userService.getVerifiedUserByUsername(principal.getName());
         if (changedContent) {
-            moodResultService.CalculateResult(entry, user);
-            return new MoodEntryDetailResponseDTO(entry, null, isEditable, canFeedback);
+            String normed = NormalizeInput.normalizeForMatch(entry.getContent());
+            Boolean isCrisis = CrisisDetector.hasCrisisSignal(normed);
+
+            moodResultService.CalculateResult(entry, user, isCrisis);
+
+            MoodEntryDetailResponseDTO response = new MoodEntryDetailResponseDTO(entry, null, isEditable, canFeedback);
+            response.setIsCrisis(isCrisis);
+            return response;
         }
         // Không cập nhật content -> Lấy kết quả cũ
         return new MoodEntryDetailResponseDTO(entry, entry.getMoodResult(), isEditable, canFeedback);

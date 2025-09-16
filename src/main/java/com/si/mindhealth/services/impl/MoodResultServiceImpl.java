@@ -30,9 +30,9 @@ public class MoodResultServiceImpl implements MoodResultService {
     @Override
     @Async
     @Transactional
-    public void CalculateResult(MoodEntry entry, User user,  Boolean isCrisis) {
+    public void CalculateResult(MoodEntry entry, User user, Boolean isCrisis, String normed) {
         // Chạy NLP
-        TopicMultiResult results = topicDetector.detectMulti(entry, user.getIsAcceptSharingData(), isCrisis);
+        TopicMultiResult results = topicDetector.detectMulti(entry, user.getIsAcceptSharingData(), isCrisis, normed);
 
         // ===== UP SERT THEO @MapsId (id của MoodResult == entry.getId()) =====
         Long entryId = entry.getId();
@@ -75,8 +75,13 @@ public class MoodResultServiceImpl implements MoodResultService {
     }
 
     @Override
+    public void CalculateResult(MoodEntry entry, User user, Boolean isCrisis) {
+        this.CalculateResult(entry, user, isCrisis, null);
+    }
+
+    @Override
     public void CalculateResult(MoodEntry entry, User user) {
-        this.CalculateResult(entry, user, null);
+        this.CalculateResult(entry, user, null, null);
     }
 
     @Override
@@ -89,7 +94,7 @@ public class MoodResultServiceImpl implements MoodResultService {
     public MoodResult get(Long id) {
         Optional<MoodResult> o = moodResultRepository.findById(id);
         if (o.isEmpty())
-            throw new MyBadRequestException("Không tìm thấy kết quả nhật ký với ID: " +  id);
+            throw new MyBadRequestException("Không tìm thấy kết quả nhật ký với ID: " + id);
         return o.get();
     }
 }

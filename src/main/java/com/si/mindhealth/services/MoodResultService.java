@@ -12,4 +12,6 @@ public interface MoodResultService {
     void CalculateResult(MoodEntry entry, User user);
 
     void CalculateResult(MoodEntry entry, User user, Boolean isCrisis);
+    
+    void CalculateResult(MoodEntry entry, User user, Boolean isCrisis, String normed);
 }
