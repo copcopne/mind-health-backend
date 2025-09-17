@@ -1,24 +1,33 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 
 <head>
-    <title>Trang chủ</title>
+    <meta charset="utf-8" />
+    <title>Trang quản trị</title>
     <th:block th:replace="~{base :: styles}"></th:block>
 </head>
 
-<body class="d-flex flex-column vh-100">
-    <div th:replace="base :: header"></div>
+<body class="d-flex flex-column min-vh-100 bg-light">
+    <!-- Header -->
+    <div th:replace="~{base :: header}"></div>
 
-    <main style="margin-top: 58px">
-        <div class="container pt-4">
-            <h2>Trang quản trị</h2>
-            <p>Xin chào, <span sec:authentication="name"></span>!</p>
+    <main class="flex-grow-1" style="margin-top: 64px;">
+        <div class="container py-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 text-center">
+                    <h2 class="h4 mb-3">Xin chào 👋</h2>
+                    <p class="fs-5 mb-0">
+                        Chào mừng <span class="fw-semibold" sec:authentication="name">User</span> đến với trang quản
+                        trị.
+                    </p>
+                </div>
+            </div>
         </div>
     </main>
 
+    <!-- Scripts -->
     <div th:replace="~{base :: mdb_script}"></div>
     <div th:replace="~{base :: main_scripts}"></div>
-
 </body>
 
 </html>
