@@ -24,9 +24,11 @@ public class GeminiService {
 
     Map<String, Object> body = Map.of(
         "contents", List.of(
-            Map.of("parts", List.of(Map.of("text", prompt)))
-        )
-    );
+            Map.of("parts", List.of(Map.of("text", prompt)))),
+
+        "generationConfig", Map.of(
+            "thinkingConfig", Map.of(
+                "thinkingBudget", 0)));
 
     var uri = String.format("/v1beta/models/%s:generateContent?key=%s",
         props.model(), props.apiKey());
@@ -35,29 +37,33 @@ public class GeminiService {
         .uri(uri)
         .bodyValue(body)
         .retrieve()
-        .onStatus(HttpStatusCode::isError, clientResp ->
-            clientResp.bodyToMono(String.class)
-                .defaultIfEmpty("Unknown error")
-                .flatMap(msg -> Mono.error(new RuntimeException("Gemini error: " + msg)))
-        )
-        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+        .onStatus(HttpStatusCode::isError, clientResp -> clientResp.bodyToMono(String.class)
+            .defaultIfEmpty("Unknown error")
+            .flatMap(msg -> Mono.error(new RuntimeException("Gemini error: " + msg))))
+        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+        })
         .block();
 
-    if (response == null) return null;
+    if (response == null)
+      return null;
 
     var candidates = (List<Map<String, Object>>) response.get("candidates");
-    if (candidates == null || candidates.isEmpty()) return null;
+    if (candidates == null || candidates.isEmpty())
+      return null;
 
     var content = (Map<String, Object>) candidates.get(0).get("content");
-    if (content == null) return null;
+    if (content == null)
+      return null;
 
     var parts = (List<Map<String, Object>>) content.get("parts");
-    if (parts == null || parts.isEmpty()) return null;
+    if (parts == null || parts.isEmpty())
+      return null;
 
     var sb = new StringBuilder();
     for (var p : parts) {
       var t = (String) p.get("text");
-      if (t != null) sb.append(t);
+      if (t != null)
+        sb.append(t);
     }
     return sb.toString();
   }
