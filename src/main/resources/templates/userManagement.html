@@ -83,7 +83,7 @@
                                     <td th:text="${u.lastName}">Nguyễn</td>
                                     <td th:text="${u.firstName}">An</td>
                                     <td><span class="badge bg-secondary" th:text="${u.role}">USER</span></td>
-                                    <td th:text="${u.gender} ? 'Nam' : 'Nữ'">Nam</td>
+                                    <td th:text="${u.gender} ? 'Nữ' : 'Nam'">Nam</td>
                                     <td class="text-end">
                                         <a class="btn btn-sm btn-outline-secondary" th:href="${currentUser != u.username} 
                                                                                                 ? @{/users/{id}/edit(id=${u.id})} 
